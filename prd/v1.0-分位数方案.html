@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>闪购新店初始分拆分 — PRD</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"SF Pro Text","Helvetica Neue",sans-serif;background:#f5f5f5;color:#333}
+.top-bar{position:fixed;top:0;left:0;right:0;height:52px;z-index:100;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;align-items:center;padding:0 24px;color:#fff}
+.top-bar h1{font-size:16px;font-weight:600}
+.top-bar .tag{margin-left:12px;background:rgba(255,255,255,.15);border-radius:4px;padding:2px 8px;font-size:11px}
+.top-bar .date{margin-left:auto;font-size:12px;color:rgba(255,255,255,.6)}
+.main-wrap{margin-top:52px;padding:20px;max-width:1000px;margin-left:auto;margin-right:auto}
+#spec-area{background:#fff;border-radius:12px;padding:20px 24px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.sec-title{font-size:16px;font-weight:700;margin:18px 0 8px;padding-bottom:6px;border-bottom:2px solid #f0f0f0;display:flex;align-items:center;gap:6px}
+.sec-title:first-of-type{margin-top:0}
+.sec-item p{font-size:13px;line-height:1.7;color:#444;margin-bottom:6px}
+.sec-item ul{padding-left:18px;font-size:13px;color:#444;margin:6px 0}
+.sec-item .info-box{background:#e3f2fd;border-left:3px solid #1976d2;padding:8px 12px;border-radius:4px;font-size:12px;color:#0d47a1;margin:8px 0;line-height:1.5}
+.sec-item .success-box{background:#d4edda;border-left:3px solid #28a745;padding:8px 12px;border-radius:4px;font-size:12px;color:#155724;margin:8px 0;line-height:1.5}
+.spec-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.spec-table th{background:#f8f9fa;padding:6px 8px;text-align:left;font-weight:600;border:1px solid #e0e0e0}
+.spec-table td{padding:6px 8px;border:1px solid #e0e0e0}
+.spec-divider{border:none;border-top:1px solid #eee;margin:18px 0}
+.p-frame{border:2px solid #e2e8f0;border-radius:8px;overflow:hidden;margin:10px 0;background:#fff}
+.p-sbar{width:200px;background:#1e293b;flex-shrink:0}
+.p-logo{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:6px;color:#fff;font-size:12px;font-weight:600}
+.p-nav-itm{display:block;color:#94a3b8;padding:4px 10px 4px 14px;font-size:10px;border-left:3px solid transparent}
+.p-nav-itm.active{color:#38b2ac;font-weight:600;border-left-color:#38b2ac;background:rgba(0,0,0,.2)}
+.p-nav-sub{padding-left:10px}
+.p-nav-sub .p-nav-itm{font-size:10px;padding-left:14px}
+.p-topbar{height:32px;background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;padding:0 12px;font-size:10px;color:#94a3b8}
+.p-topbar .cur{color:#334155;font-weight:500}
+.p-tabs{background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;padding:0 8px;flex-wrap:wrap}
+.p-tab{padding:5px 8px;font-size:10px;color:#64748b;border-bottom:2px solid transparent;white-space:nowrap}
+.p-tab.active{color:#48bb78;font-weight:600;border-bottom-color:#48bb78}
+.p-main{padding:12px 16px;background:#fff}
+.p-row{display:flex;align-items:center;gap:3px;flex-wrap:wrap}
+.p-row+.p-row{margin-top:5px}
+.p-lbl{font-size:11px;font-weight:500;color:#1e293b;white-space:nowrap}
+.p-lbl .req{color:#e53e3e}
+.p-inp{width:48px;padding:2px 4px;border:1px solid #cbd5e1;border-radius:3px;font-size:11px;color:#1e293b;background:#f8fafc;text-align:center}
+.p-txt{font-size:11px;color:#334155;white-space:nowrap}
+.p-sub{margin-left:16px}
+.p-rg{display:inline-flex;gap:10px;align-items:center}
+.p-rd{display:inline-flex;align-items:center;gap:2px;font-size:11px;color:#334155}
+.p-dot{width:10px;height:10px;border-radius:50%;border:2px solid #cbd5e1;display:inline-block}
+.p-dot.on{border-color:#166534}
+.p-dot.on::after{content:'';width:5px;height:5px;border-radius:50%;background:#166534;display:block;margin:.5px}
+.p-st{font-size:12px;font-weight:600;color:#1e293b;padding-bottom:4px;border-bottom:1px solid #e2e8f0;margin-bottom:8px}
+.p-hr{border:none;border-top:1px solid #e2e8f0;margin:10px 0}
+.p-ct{width:100%;border-collapse:collapse;font-size:10px}
+.p-ct th{background:#f8fafc;color:#64748b;font-weight:600;padding:4px 6px;text-align:left;border:1px solid #e2e8f0}
+.p-ct td{padding:4px 6px;border:1px solid #e2e8f0;font-size:10px}
+.p-ct td.l2{padding-left:18px}
+.p-ct td.l3{padding-left:30px}
+.p-ct input{width:42px;padding:1px 3px;border:1px solid #cbd5e1;border-radius:2px;font-size:10px;background:#f8fafc;text-align:center}
+.p-rule{background:#f0fdf4;border-left:3px solid #48bb78;padding:5px 8px;font-size:10px;color:#166534;line-height:1.5;margin-bottom:6px}
+.p-btn{display:inline-flex;padding:3px 10px;border-radius:4px;font-size:10px}
+.p-btn-ed{background:#48bb78;color:#fff;border:1px solid #48bb78;margin-top:6px}
+.p-wrapper{position:relative}
+.p-zoom-btn{position:absolute;top:6px;right:6px;z-index:10;background:rgba(255,255,255,.9);border:1px solid #d1d5db;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;color:#64748b}
+.p-zoom-btn:hover{background:#fff;border-color:#cbd5e1}
+.p-zoom-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:1000;overflow:auto;padding:20px}
+.p-zoom-overlay.show{display:block}
+.p-zoom-close{position:fixed;top:16px;right:16px;z-index:1001;background:#fff;border:1px solid #d1d5db;border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;line-height:34px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.p-zoom-body{width:100%;background:#f5f7fa;overflow:auto}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>闪购新店初始分拆分</h1>
+  <span class="tag">PRD</span>
+  <span class="date">2026-06-01 · v1.0</span>
+</div>
+
+<div class="main-wrap">
+<div id="spec-area">
+
+<h2 style="font-size:20px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">闪购新店初始分拆分</h2>
+<p style="font-size:12px;color:#666;margin-bottom:8px;line-height:1.5;">关联：闪购综合分拆分（范围收窄）<br>业务反馈：新店加权后排名断崖式下跌<br>改动范围：管理后台（新增Tab）+ 数据组（ES脚本）</p>
+<hr class="spec-divider">
+
+<!-- 背景 -->
+<div class="sec-title"><span>📋</span> 需求背景</div>
+<div class="sec-item">
+  <p>闪购新店目前使用与外卖同一套「外賣新店初始分數配置」。新店移除加权后排名断崖式下跌，业务反馈「新店加权开咗都排到5/6页后」。</p>
+  <p><strong>范围收窄：</strong>原计划全量拆分闪购综合分（含独立排序配置、5个混排场景），开发评估改动量大，本次只拆分「闪购新店初始分」。</p>
+  <div class="success-box"><strong>核心目标：</strong>建立闪购独立的新店初始分体系。加权期内获合理曝光，结束后平稳过渡。</div>
+</div>
+
+<!-- 方案 -->
+<div class="sec-title"><span>🏗️</span> 整体方案</div>
+<div class="sec-item">
+  <p>参考外卖初始分机制，初始分作为<strong>额外加分</strong>，与自然综合分独立计算。</p>
+  <p>闪购新店复用外卖初始分机制，在此基础上增加<strong>按分类的额外加分</strong>，即：</p>
+  <div class="info-box"><strong>初始分总分 = 百分比得分（由「取二级品类近7日分数百分比」决定） + 分类加分（由「主營加分 / 輔營加分」决定）</strong></div>
+  <p><strong>新店总分 = 自然综合分（含「新门店」维度，可在门店综合排序配置中调整） + 初始分总分</strong></p>
+  <p style="margin-top:8px;"><strong>全部参数均为可配置项，默认值与外卖一致：</strong></p>
+  <table class="spec-table">
+    <tr><th>配置项（管理后台字段名）</th><th>默认值</th><th>说明</th></tr>
+    <tr><td>取二级品类近7日分数百分比</td><td>75%</td><td>决定百分比得分的基准</td></tr>
+    <tr><td>二级品类门店数小于10百分比</td><td>15%</td><td>品类门店数&lt;10时的兜底</td></tr>
+    <tr><td>持续天数</td><td>24天</td><td>初始分最多持续多久</td></tr>
+    <tr><td>按分数衰退百分比</td><td>30%</td><td>衰退触发的品类排名阈值</td></tr>
+    <tr><td>衰退天数</td><td>18天</td><td>每日衰退 = 初始分总分 ÷ 衰退天数</td></tr>
+  </table>
+  <div class="info-box" style="margin-top:8px;"><strong>每日衰退分值 = 初始分总分（百分比得分 + 分类加分） ÷ 衰退天数</strong>，两者同步线性衰减，每日减固定分值，直至归零或到期。</div>
+  <p style="margin-top:8px;"><strong>衰退触发逻辑：</strong></p>
+  <ul style="margin-top:4px;">
+    <li>若「<strong>開啟新店/老店加權時</strong>」选择<strong>「開始衰退」</strong>：加权即刻开始线性衰退，不等待分数条件</li>
+    <li>若选择<strong>「不處理」</strong>：需等自然综合分+初始分总分 ≥ 品类第「<strong>按分数衰退百分比</strong>」位的门店分时，才开始衰退</li>
+    <li>无论哪种模式，初始分最多持续「<strong>持续天数</strong>」天，到期归零</li>
+  </ul>
+  <p style="margin-top:8px;"><strong>生效条件：</strong>门店需完成至少1单。</p>
+  <p><strong>加分优先级（品类加分）：</strong>优先取门店所属<strong>二级分类</strong>的加分；若二级未设置（0或未填），向上取<strong>一级分类</strong>；均未设置则为0。</p>
+  <p><strong>主营/辅营取值规则：</strong>主营加分与辅营加分<strong>累加计算</strong>，两者同时生效。</p>
+</div>
+
+<!-- 交互原型 -->
+<div class="sec-title"><span>🎨</span> 交互原型</div>
+<p style="font-size:12px;color:#666;margin-bottom:6px;line-height:1.5;">管理后台：業務運營 → 搜索管理 → 綜合排序配置。新增頂層Tab「閃購新店初始分數配置」，平行於「外賣新店初始分數配置」。内容：新店初始分字段 + 品類額外加分表格。</p>
+
+<div class="p-wrapper">
+<button class="p-zoom-btn" onclick="document.getElementById('zoom').classList.add('show')">🔍 放大查看</button>
+<div class="p-frame"><div style="display:flex;">
+
+<div class="p-sbar">
+  <div class="p-logo">🦊 澳覓管理系統</div>
+  <div style="padding:4px 0;">
+    <div class="p-nav-itm">儀表板</div>
+    <div class="p-nav-itm active">業務運營 ▾</div>
+    <div class="p-nav-sub"><div class="p-nav-itm">搜索管理 ▾</div>
+    <div class="p-nav-sub"><div class="p-nav-itm active">綜合排序配置</div></div></div>
+    <div class="p-nav-itm">營銷活動</div>
+    <div class="p-nav-itm">用戶管理</div>
+  </div>
+</div>
+
+<div style="flex:1;display:flex;flex-direction:column;">
+  <div class="p-topbar">dashboard / 業務運營 / <span class="cur">綜合排序配置</span></div>
+  <div class="p-tabs">
+    <span class="p-tab">門店綜合排序配置</span>
+    <span class="p-tab">團購綜合排序配置</span>
+    <span class="p-tab">外賣綜合排序配置</span>
+    <span class="p-tab">外賣點金推廣排序配置</span>
+    <span class="p-tab active">閃購新店初始分數配置</span>
+    <span class="p-tab">外賣新店初始分數配置</span>
+    <span class="p-tab">聚合搜索排序配置</span>
+  </div>
+  <div class="p-main">
+    <div style="font-size:10px;color:#64748b;margin-bottom:6px;line-height:1.4;">本規則配置僅適用於完成首單的閃購新店。更新配置後，次日凌晨生效。</div>
+    <div class="p-st">新店初始分</div>
+    <div class="p-row"><span class="p-lbl"><span class="req">*</span> 初始化分數</span><span class="p-txt">取二級品類近7日分數從高到低第</span><input class="p-inp" value="75" readonly><span class="p-txt">%位的數值</span></div>
+    <div class="p-row p-sub"><span class="p-txt">二級品類門店數小於10，取品類</span><input class="p-inp" value="15" readonly><span class="p-txt">%位的數值</span></div>
+    <div class="p-row"><span class="p-lbl"><span class="req">*</span> 持續天數</span><input class="p-inp" value="24" readonly><span class="p-txt">天</span></div>
+    <div class="p-row"><span class="p-lbl"><span class="req">*</span> 按分數衰退</span><span class="p-txt">達到品類近7日分數從高到低第</span><input class="p-inp" value="30" readonly><span class="p-txt">%位的數值時，開始衰退</span></div>
+    <div class="p-row"><span class="p-lbl"><span class="req">*</span> 衰退天數</span><input class="p-inp" value="18" readonly><span class="p-txt">天</span></div>
+    <div class="p-row"><span class="p-lbl"><span class="req">*</span> 開啟新店/老店加權時</span><span class="p-rg"><span class="p-rd"><span class="p-dot on"></span>開始衰退</span><span class="p-rd"><span class="p-dot"></span>不處理</span></span></div>
+    <div class="p-row"><span class="p-lbl"><span class="req">*</span> 歇業保護是否保留天數</span><span class="p-rg"><span class="p-rd"><span class="p-dot on"></span>是</span><span class="p-rd"><span class="p-dot"></span>否</span></span></div>
+    <div class="p-hr"></div>
+    <div class="p-st">品類額外加分</div>
+    <div class="p-rule"><strong>加分優先級：</strong>優先取<strong>二級分類</strong>；若二級未設置（0或未填），向上取<strong>一級分類</strong>；均未設置則為0。<br><strong>主營/輔營：</strong>主營加分與輔營加分<strong>累加計算</strong>，兩者同時生效。</div>
+    <table class="p-ct">
+      <tr><th style="width:36%;">營銷品類</th><th style="width:14%;">主營加分</th><th style="width:14%;">輔營加分</th><th style="width:36%;">更新時間</th></tr>
+      <tr><td>超市便利</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+      <tr><td class="l2">大型超市</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+      <tr><td class="l2">便利店</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+      <tr><td class="l2">超市</td><td><input value="30" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+      <tr><td>生鮮果蔬</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+      <tr><td class="l2">蔬菜店</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+      <tr><td class="l2">水果店</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+      <tr><td class="l2">生鮮超市</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+      <tr><td class="l3">生鮮超市→進口生鮮</td><td><input value="50" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+    </table>
+    <span class="p-btn p-btn-ed">編輯</span>
+  </div>
+</div>
+</div></div>
+</div>
+
+<!-- 字段规格 -->
+<div class="sec-title"><span>📋</span> 字段规格</div>
+<div class="sec-item">
+  <p><strong>新店初始分（7个字段，与外卖一致）</strong></p>
+  <table class="spec-table">
+    <tr><th>字段</th><th>默认值</th><th>校验</th></tr>
+    <tr><td>*初始化分数→取二级品类近7日分数百分比</td><td>75%</td><td>1-100</td></tr>
+    <tr><td>*二级品类门店数小于10百分比</td><td>15%</td><td>1-100</td></tr>
+    <tr><td>*持续天数</td><td>24天</td><td>小于50正整数</td></tr>
+    <tr><td>*按分数衰退→品类百分比</td><td>30%</td><td>1-100</td></tr>
+    <tr><td>*衰退天数</td><td>18天</td><td>小于50正整数</td></tr>
+    <tr><td>*开启新店/老店加权时</td><td>开始衰退</td><td>开始衰退/不处理</td></tr>
+    <tr><td>*歇业保护是否保留天数</td><td>是</td><td>是/否</td></tr>
+  </table>
+</div>
+
+<div class="sec-item">
+  <p><strong>品类额外加分（复用「闪购分类页分」字段）</strong></p>
+  <table class="spec-table">
+    <tr><th>字段</th><th>校验</th></tr>
+    <tr><td>营销品类（接口拉取，树形列表）</td><td>不可编辑</td></tr>
+    <tr><td>主营加分</td><td>0-999</td></tr>
+    <tr><td>辅营加分</td><td>0-999</td></tr>
+  </table>
+</div>
+
+<hr class="spec-divider">
+<p style="font-size:11px;color:#94a3b8;text-align:center;padding:6px 0;">闪购新店初始分拆分 PRD · v1.0 · 2026-06-01</p>
+
+</div><!-- /spec-area -->
+</div><!-- /main-wrap -->
+
+<!-- 全屏放大 -->
+<div id="zoom" class="p-zoom-overlay">
+  <div class="p-zoom-close" onclick="document.getElementById('zoom').classList.remove('show')">✕</div>
+  <div class="p-zoom-body"><div class="p-zoom-2x">
+    <div style="display:flex;">
+      <div class="p-sbar">
+        <div class="p-logo">🦊 澳覓管理系統</div>
+        <div style="padding:4px 0;">
+          <div class="p-nav-itm">儀表板</div>
+          <div class="p-nav-itm active">業務運營 ▾</div>
+          <div class="p-nav-sub"><div class="p-nav-itm">搜索管理 ▾</div><div class="p-nav-sub"><div class="p-nav-itm active">綜合排序配置</div></div></div>
+          <div class="p-nav-itm">營銷活動</div>
+          <div class="p-nav-itm">用戶管理</div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;">
+        <div class="p-topbar">dashboard / 業務運營 / <span class="cur">綜合排序配置</span></div>
+        <div class="p-tabs">
+          <span class="p-tab">門店綜合排序配置</span>
+          <span class="p-tab">團購綜合排序配置</span>
+          <span class="p-tab">外賣綜合排序配置</span>
+          <span class="p-tab">外賣點金推廣排序配置</span>
+          <span class="p-tab active">閃購新店初始分數配置</span>
+          <span class="p-tab">外賣新店初始分數配置</span>
+          <span class="p-tab">聚合搜索排序配置</span>
+        </div>
+        <div class="p-main">
+          <div style="font-size:11px;color:#64748b;margin-bottom:10px;line-height:1.5;">本規則配置僅適用於完成首單的閃購新店。更新配置後，次日凌晨生效。</div>
+          <div class="p-st">新店初始分</div>
+          <div class="p-row"><span class="p-lbl"><span class="req">*</span> 初始化分數</span><span class="p-txt">取二級品類近7日分數從高到低第</span><input class="p-inp" value="75" readonly><span class="p-txt">%位的數值</span></div>
+          <div class="p-row p-sub"><span class="p-txt">二級品類門店數小於10，取品類</span><input class="p-inp" value="15" readonly><span class="p-txt">%位的數值</span></div>
+          <div class="p-row"><span class="p-lbl"><span class="req">*</span> 持續天數</span><input class="p-inp" value="24" readonly><span class="p-txt">天</span></div>
+          <div class="p-row"><span class="p-lbl"><span class="req">*</span> 按分數衰退</span><span class="p-txt">達到品類近7日分數從高到低第</span><input class="p-inp" value="30" readonly><span class="p-txt">%位的數值時，開始衰退</span></div>
+          <div class="p-row"><span class="p-lbl"><span class="req">*</span> 衰退天數</span><input class="p-inp" value="18" readonly><span class="p-txt">天</span></div>
+          <div class="p-row"><span class="p-lbl"><span class="req">*</span> 開啟新店/老店加權時</span><span class="p-rg"><span class="p-rd"><span class="p-dot on"></span>開始衰退</span><span class="p-rd"><span class="p-dot"></span>不處理</span></span></div>
+          <div class="p-row"><span class="p-lbl"><span class="req">*</span> 歇業保護是否保留天數</span><span class="p-rg"><span class="p-rd"><span class="p-dot on"></span>是</span><span class="p-rd"><span class="p-dot"></span>否</span></span></div>
+          <div class="p-hr"></div>
+          <div class="p-st">品類額外加分</div>
+          <div class="p-rule"><strong>加分優先級：</strong>優先取<strong>二級分類</strong>；若二級未設置（0或未填），向上取<strong>一級分類</strong>；均未設置則為0。<br><strong>主營/輔營：</strong>主營加分與輔營加分<strong>累加計算</strong>，兩者同時生效。</div>
+          <table class="p-ct">
+            <tr><th style="width:36%;">營銷品類</th><th style="width:14%;">主營加分</th><th style="width:14%;">輔營加分</th><th style="width:36%;">更新時間</th></tr>
+            <tr><td>超市便利</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+            <tr><td class="l2">大型超市</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+            <tr><td class="l2">便利店</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+            <tr><td class="l2">超市</td><td><input value="30" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+            <tr><td>生鮮果蔬</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+            <tr><td class="l2">蔬菜店</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+            <tr><td class="l2">水果店</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+            <tr><td class="l2">生鮮超市</td><td><input value="0" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+            <tr><td class="l3">生鮮超市→進口生鮮</td><td><input value="50" readonly></td><td><input value="0" readonly></td><td>2025-01-07 18:18:51</td></tr>
+          </table>
+          <span class="p-btn p-btn-ed">編輯</span>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+</body>
+</html>
