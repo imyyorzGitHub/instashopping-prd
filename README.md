@@ -6,6 +6,7 @@
 
 | 文档 | 预览链接 | 更新时间 |
 |------|---------|---------|
+| PRD-闪购点金推广排序配置拆分 v3.4 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/3b3f3605.html) | 2026-06-26 |
 | PRD-闪购点金推广品类出价上限 v2.2 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/cc0feb6d.html) | 2026-06-26 |
 | PRD-闪购点金推广排序验证 v2.7 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/fc4c60e9.html) | 2026-06-22 |
 | 2026 Q3 闪购规划 - 交叉表 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/a2d1948e.html) | 2026-06-08 10:06 |
