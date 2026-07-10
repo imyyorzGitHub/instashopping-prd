@@ -7,6 +7,7 @@
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./landmark-preview.css">
+  <link rel="stylesheet" href="./flight-preview.css">
 </head>
 <body>
   <main id="stage" data-phase="orbit">
@@ -15,8 +16,8 @@
 
     <div id="loading" role="status">
       <span class="loading-line"></span>
-      <strong>正在装载地球与跃迁系统</strong>
-      <small id="loading-copy">EARTH / ATMOSPHERE / WORMHOLE / MACAU OSM</small>
+      <strong>正在装载地球、澳门城市与航线系统</strong>
+      <small id="loading-copy">EARTH / WORMHOLE / MACAU OSM / SAFE FLIGHT</small>
     </div>
 
     <section id="intro" class="hud-panel">
@@ -30,9 +31,9 @@
     </section>
 
     <section id="arrival" class="hud-panel" aria-hidden="true">
-      <span class="eyebrow">MACAU HERO LANDMARKS</span>
+      <span class="eyebrow">MACAU STREET FLIGHT</span>
       <h2>澳门上空</h2>
-      <p>Phase 3：澳门塔、新葡京、大三巴、路氹酒店群、摩珀斯与澳门国际机场已按真实坐标接入。可使用下方导航逐个检视。</p>
+      <p>Phase 4：选择下方地标，即可沿真实道路安全走廊飞行。每段航程约 8–15 秒，最后进入地标停靠构图。</p>
       <button id="replay" type="button">重新播放开场</button>
     </section>
 
@@ -48,7 +49,15 @@
       <span id="phase-value">22.1987° N · 113.5439° E</span>
     </div>
 
-    <nav id="landmark-nav" aria-label="澳门地标检视">
+    <div id="route-progress" aria-live="polite">
+      <header>
+        <strong id="route-name">飞往澳门地标</strong>
+        <small id="route-status">等待航线</small>
+      </header>
+      <div class="route-track"><span id="route-progress-fill"></span></div>
+    </div>
+
+    <nav id="landmark-nav" aria-label="澳门地标航线">
       <strong id="landmark-title">澳门城市概览</strong>
       <div id="landmark-buttons"></div>
     </nav>
@@ -66,6 +75,6 @@
   }
   </script>
   <script type="module" src="./main-phase1b.js"></script>
-  <script type="module" src="./city-layer.js"></script>
+  <script type="module" src="./city-layer-phase4.js"></script>
 </body>
 </html>
