@@ -13,7 +13,7 @@ function createAircraft() {
     new THREE.ConeGeometry(0.16, 0.82, 5),
     new THREE.MeshStandardMaterial({ color: 0xb9c8dc, emissive: 0x375879, emissiveIntensity: 0.42, metalness: 0.74, roughness: 0.28 })
   );
-  body.rotation.x = -Math.PI / 2;
+  body.rotation.x = Math.PI / 2;
   craft.add(body);
 
   const wingMaterial = new THREE.MeshStandardMaterial({ color: 0x283851, emissive: 0x172b48, emissiveIntensity: 0.55, metalness: 0.62, roughness: 0.32 });
@@ -28,7 +28,7 @@ function createAircraft() {
     craft.add(light);
   }
   const tail = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 8), new THREE.MeshBasicMaterial({ color: 0xff986d, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
-  tail.position.z = 0.42;
+  tail.position.z = -0.42;
   craft.add(tail);
   craft.scale.setScalar(0.82);
   craft.visible = false;
@@ -114,6 +114,7 @@ export async function createFlightController({ scene, camera, city, landmarks, c
   function cancel() {
     flight = null;
     craft.visible = false;
+    craft.scale.setScalar(0.82);
     removeRouteLine();
     updateHud("", 0, "");
   }
