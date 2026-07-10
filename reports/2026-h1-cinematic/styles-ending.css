@@ -1,0 +1,262 @@
+  #sun-layer {
+    display: none;
+    position: absolute;
+    right: -32vmin;
+    bottom: -54vmin;
+    width: clamp(960px, 136vmin, 1540px);
+    aspect-ratio: 1;
+    z-index: 8;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(0, 50px, 0) scale(0.86);
+    filter:
+      drop-shadow(0 0 54px rgba(255, 194, 90, 0.9))
+      drop-shadow(0 0 130px rgba(254, 53, 99, 0.44));
+    transition: none;
+  }
+
+  #sun-layer::before,
+  #sun-layer::after,
+  .sun-core {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+  }
+
+  #sun-layer::before {
+    inset: -30%;
+    background:
+      conic-gradient(from 10deg,
+        rgba(255, 245, 188, 0.08),
+        rgba(255, 119, 58, 0.78),
+        rgba(254, 53, 99, 0.18),
+        rgba(255, 198, 90, 0.7),
+        rgba(255, 245, 188, 0.08));
+    filter: blur(14px);
+    animation: coronaSpin 7.5s linear infinite;
+  }
+
+  #sun-layer::after {
+    inset: -18%;
+    background:
+      radial-gradient(ellipse 4% 22% at 52% 9%, rgba(255, 247, 189, 0.88), rgba(255, 124, 45, 0.45) 48%, transparent 72%),
+      radial-gradient(ellipse 5% 20% at 64% 14%, rgba(255, 235, 141, 0.72), rgba(254, 53, 99, 0.26) 52%, transparent 74%),
+      radial-gradient(ellipse 6% 18% at 40% 17%, rgba(255, 220, 118, 0.66), rgba(255, 97, 52, 0.24) 54%, transparent 76%),
+      radial-gradient(circle at 50% 50%, transparent 44%, rgba(255, 246, 193, 0.52) 46%, transparent 53%),
+      conic-gradient(from 0deg,
+        transparent 0 8deg,
+        rgba(255, 241, 180, 0.7) 11deg,
+        transparent 17deg 38deg,
+        rgba(255, 120, 47, 0.64) 42deg,
+        transparent 49deg 82deg,
+        rgba(255, 230, 145, 0.62) 88deg,
+        transparent 96deg 140deg,
+        rgba(254, 53, 99, 0.46) 148deg,
+        transparent 156deg 220deg,
+        rgba(255, 214, 120, 0.64) 228deg,
+        transparent 236deg 300deg,
+        rgba(255, 104, 54, 0.6) 310deg,
+        transparent 318deg 360deg);
+    filter: blur(5px);
+    animation: coronaPulse 3.2s ease-in-out infinite alternate;
+  }
+
+  .sun-core {
+    inset: 20%;
+    background:
+      radial-gradient(circle at 38% 34%, #fff8d4 0 12%, #ffdc87 22%, #ff944c 43%, #ff6142 62%, #fe3563 78%, rgba(254, 53, 99, 0) 80%);
+    box-shadow:
+      inset -16px -18px 28px rgba(136, 22, 31, 0.34),
+      inset 12px 14px 26px rgba(255, 248, 216, 0.42),
+      0 0 42px rgba(255, 223, 132, 0.78);
+    animation: sunBreath 2.8s ease-in-out infinite alternate;
+  }
+
+  .sun-core::before,
+  .sun-core::after {
+    content: "";
+    position: absolute;
+    inset: -18%;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .sun-core::before {
+    background:
+      conic-gradient(from 210deg,
+        transparent 0 14deg,
+        rgba(255, 246, 184, 0.88) 18deg,
+        rgba(255, 113, 42, 0.52) 24deg,
+        transparent 34deg 78deg,
+        rgba(255, 233, 142, 0.72) 84deg,
+        rgba(254, 53, 99, 0.3) 92deg,
+        transparent 104deg 158deg,
+        rgba(255, 141, 48, 0.62) 166deg,
+        transparent 178deg 360deg);
+    -webkit-mask: radial-gradient(circle, transparent 0 60%, #000 64% 74%, transparent 78%);
+    mask: radial-gradient(circle, transparent 0 60%, #000 64% 74%, transparent 78%);
+    filter: blur(4px);
+    animation: coronaSpin 5.8s linear infinite reverse;
+  }
+
+  .sun-core::after {
+    background:
+      radial-gradient(ellipse 34% 10% at 24% 28%, rgba(255, 243, 170, 0.9), rgba(255, 97, 66, 0.18) 58%, transparent 70%),
+      radial-gradient(ellipse 28% 9% at 17% 56%, rgba(255, 222, 122, 0.78), rgba(254, 53, 99, 0.12) 62%, transparent 74%);
+    filter: blur(8px);
+    animation: coronaPulse 2.7s ease-in-out infinite alternate;
+  }
+
+  #end-title {
+    position: absolute;
+    left: 34%;
+    top: 50%;
+    z-index: 12;
+    opacity: 0;
+    pointer-events: none;
+    color: var(--ink);
+    width: min(680px, 72vw);
+    line-height: 0.9;
+    font-weight: 840;
+    letter-spacing: 0;
+    text-align: left;
+    transform: translate(-50%, calc(-50% + 44px)) scale(0.94);
+    text-shadow: 0 0 48px rgba(255, 111, 56, 0.48), 0 6px 26px rgba(22, 7, 24, 0.42);
+    transition: none;
+  }
+
+  #end-title span {
+    display: block;
+    margin-bottom: 20px;
+    color: rgba(255, 247, 238, 0.74);
+    font-size: clamp(16px, 1.8vw, 26px);
+    line-height: 1.2;
+    font-weight: 720;
+  }
+
+  #end-title strong {
+    display: block;
+    font-size: clamp(68px, 9.6vw, 142px);
+    line-height: 0.9;
+    font-weight: 860;
+  }
+
+  @keyframes coronaSpin {
+    from { transform: rotate(0deg) scale(1); }
+    to { transform: rotate(360deg) scale(1.02); }
+  }
+
+  @keyframes coronaPulse {
+    from { transform: rotate(-4deg) scale(0.96); opacity: 0.72; }
+    to { transform: rotate(5deg) scale(1.08); opacity: 1; }
+  }
+
+  @keyframes sunBreath {
+    from { transform: scale(0.985); filter: saturate(1.02); }
+    to { transform: scale(1.025); filter: saturate(1.18); }
+  }
+
+  #progress-track {
+    position: relative;
+    width: 120px;
+    height: 1px;
+    background: rgba(255,255,255,0.16);
+  }
+
+  #progress-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 1px;
+    width: 0;
+    background: linear-gradient(90deg, var(--peach), var(--coral));
+    box-shadow: 0 0 14px rgba(244, 193, 155, 0.7);
+  }
+
+  #chapter-nav {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    z-index: 14;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 247, 238, 0.76);
+    pointer-events: auto;
+    user-select: none;
+  }
+
+  .chapter-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid rgba(255, 237, 221, 0.36);
+    border-radius: 4px;
+    color: var(--ink);
+    background: rgba(22, 7, 24, 0.58);
+    box-shadow: 0 10px 28px rgba(18, 0, 28, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    font: 650 26px/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+    cursor: pointer;
+    transition: background 180ms ease, border-color 180ms ease, opacity 180ms ease, transform 180ms ease;
+  }
+
+  .chapter-button:hover:not(:disabled),
+  .chapter-button:focus-visible:not(:disabled) {
+    border-color: rgba(255, 215, 184, 0.86);
+    background: rgba(40, 8, 46, 0.86);
+    transform: translateY(-1px);
+    outline: none;
+  }
+
+  .chapter-button:disabled {
+    opacity: 0.26;
+    cursor: default;
+  }
+
+  #chapter-count {
+    min-width: 58px;
+    color: rgba(255, 247, 238, 0.68);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  #flight-status {
+    min-width: 72px;
+    color: rgba(255, 220, 183, 0.8);
+    font-size: 11px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  #skip-flight {
+    display: none;
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 215, 184, 0.24);
+    border-radius: 3px;
+    color: rgba(255, 247, 238, 0.72);
+    background: rgba(22, 7, 24, 0.34);
+    font: 600 11px/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+    cursor: pointer;
+  }
+
+  #chapter-nav[data-mode="departing"] #skip-flight,
+  #chapter-nav[data-mode="flying"] #skip-flight,
+  #chapter-nav[data-mode="arriving"] #skip-flight,
+  #chapter-nav[data-mode="settling"] #skip-flight {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  #skip-flight:hover,
+  #skip-flight:focus-visible {
+    border-color: rgba(255, 215, 184, 0.7);
+    color: var(--ink);
+    outline: none;
+  }
+
