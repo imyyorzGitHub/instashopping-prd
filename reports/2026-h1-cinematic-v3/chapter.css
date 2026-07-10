@@ -14,7 +14,9 @@
 }
 
 #chapter-glow {
-  background: radial-gradient(circle at 82% 78%, rgba(80, 133, 197, .18), transparent 30%);
+  background:
+    radial-gradient(ellipse 34% 68% at 79% 46%, rgba(98, 157, 220, .23), rgba(44, 82, 137, .08) 42%, transparent 76%),
+    radial-gradient(circle at 91% 22%, rgba(96, 115, 205, .11), transparent 30%);
   mix-blend-mode: screen;
 }
 
@@ -150,7 +152,7 @@
 }
 
 #stage.is-chapter-active #vignette {
-  opacity: .72;
+  opacity: .62;
 }
 
 @media (max-height: 760px) and (min-width: 761px) {
