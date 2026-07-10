@@ -14,11 +14,12 @@
     <canvas id="city-layer" aria-label="澳门真实城市夜景"></canvas>
     <div id="chapter-dim"></div>
     <div id="chapter-glow"></div>
+    <div id="chapter-wipe" aria-hidden="true"></div>
 
     <div id="loading" role="status">
       <span class="loading-line"></span>
       <strong>正在装载地球、澳门城市与章节镜头</strong>
-      <small id="loading-copy">EARTH / WORMHOLE / MACAU OSM / CHAPTER COMPOSITION</small>
+      <small id="loading-copy">EARTH / WORMHOLE / MACAU OSM / SIX CHAPTERS</small>
     </div>
 
     <section id="intro" class="hud-panel">
@@ -32,9 +33,9 @@
     </section>
 
     <section id="arrival" class="hud-panel" aria-hidden="true">
-      <span class="eyebrow">CHAPTER 01 · PERFORMANCE</span>
+      <span class="eyebrow">2026 H1 · SIX CHAPTERS</span>
       <h2>澳门上空</h2>
-      <p>以一段约 3 秒的短掠过进入第一章。新葡京会自然落入右下构图，并由夜景实体转化为章节剪影。</p>
+      <p>六个章节会依次由城市夜景进入地标广角定格；章节之间以建筑仰升、暗部遮挡与隐藏换镜衔接。</p>
       <button id="chapter-start" type="button" disabled>
         <span>进入第一章</span>
         <small>1 / → / SPACE</small>
@@ -43,33 +44,15 @@
     </section>
 
     <section id="chapter-content" aria-hidden="true">
-      <div class="chapter-kicker"><span>01 · 业绩快照</span></div>
-      <h2>Q1 超挑战收官，Q2 信心起点</h2>
-      <p class="chapter-body">大盘交易额 3,079 万、KA 交易额 1,544 万、拉回净增 4,480 均超挑战完成。毛利额 72 万未达标，暴露了转化与投放效率的瓶颈。</p>
-      <div class="chapter-metrics">
-        <article class="chapter-metric">
-          <strong>3,079万</strong>
-          <span>大盘有效交易额</span>
-          <small>目标 2,958 万 · 超挑战</small>
-        </article>
-        <article class="chapter-metric">
-          <strong>1,544万</strong>
-          <span>KA 有效交易额</span>
-          <small>目标 1,361 万 · 超挑战</small>
-        </article>
-        <article class="chapter-metric">
-          <strong>4,480</strong>
-          <span>拉回净增用户</span>
-          <small>目标 1,300 · 超挑战</small>
-        </article>
-        <article class="chapter-metric">
-          <strong>72万</strong>
-          <span>线上毛利额</span>
-          <small>目标 91 万 · 瓶颈暴露</small>
-        </article>
-      </div>
+      <div class="chapter-kicker"><span id="chapter-kicker-text">01 · 业绩快照</span></div>
+      <h2 id="chapter-title"></h2>
+      <p id="chapter-body" class="chapter-body"></p>
+      <div id="chapter-data" class="chapter-data"></div>
       <div class="chapter-actions">
-        <button id="chapter-replay" type="button">返回城市概览</button>
+        <button id="chapter-prev" type="button">上一章</button>
+        <span id="chapter-count" aria-live="polite">01 / 06</span>
+        <button id="chapter-next" type="button">下一章</button>
+        <button id="chapter-overview" type="button">城市概览</button>
       </div>
     </section>
 
