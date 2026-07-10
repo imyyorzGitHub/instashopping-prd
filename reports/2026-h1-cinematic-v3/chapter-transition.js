@@ -14,6 +14,53 @@ function worldFromLocal(city, vector) {
   return city.localToWorld(vector.clone());
 }
 
+function applyCameraPose(camera, lookTarget, rollDegrees = 0) {
+  camera.up.set(0, 1, 0);
+  camera.lookAt(lookTarget);
+  if (Math.abs(rollDegrees) > 0.001) {
+    camera.rotateZ(THREE.MathUtils.degToRad(rollDegrees));
+  }
+}
+
+function projectedBounds(object, camera) {
+  object.updateWorldMatrix(true, true);
+  const box = new THREE.Box3().setFromObject(object);
+  if (box.isEmpty()) return null;
+
+  const { min, max } = box;
+  const corners = [
+    [min.x, min.y, min.z], [min.x, min.y, max.z],
+    [min.x, max.y, min.z], [min.x, max.y, max.z],
+    [max.x, min.y, min.z], [max.x, min.y, max.z],
+    [max.x, max.y, min.z], [max.x, max.y, max.z]
+  ];
+  let left = 1;
+  let right = 0;
+  let top = 1;
+  let bottom = 0;
+
+  corners.forEach(values => {
+    const projected = new THREE.Vector3(...values).project(camera);
+    const x = projected.x * 0.5 + 0.5;
+    const y = -projected.y * 0.5 + 0.5;
+    left = Math.min(left, x);
+    right = Math.max(right, x);
+    top = Math.min(top, y);
+    bottom = Math.max(bottom, y);
+  });
+
+  return {
+    left,
+    right,
+    top,
+    bottom,
+    width: right - left,
+    height: bottom - top,
+    centerX: (left + right) * 0.5,
+    centerY: (top + bottom) * 0.5
+  };
+}
+
 export function createChapterTransition({
   camera,
   renderer,
@@ -64,11 +111,13 @@ export function createChapterTransition({
 
   function setContextProgress(progress) {
     const p = clamp01(progress);
+    const finalOpacity = chapter.context?.finalOpacity ?? 0.12;
+    const finalEmissive = chapter.context?.finalEmissiveIntensity ?? 0.04;
     contextMeshes.forEach(mesh => {
       const baseOpacity = mesh.userData.baseOpacity ?? 0.82;
       const baseEmissive = mesh.userData.baseEmissiveIntensity ?? mesh.material.emissiveIntensity;
-      mesh.material.opacity = THREE.MathUtils.lerp(baseOpacity, 0.12, p);
-      mesh.material.emissiveIntensity = THREE.MathUtils.lerp(baseEmissive, 0.04, p);
+      mesh.material.opacity = THREE.MathUtils.lerp(baseOpacity, finalOpacity, p);
+      mesh.material.emissiveIntensity = THREE.MathUtils.lerp(baseEmissive, finalEmissive, p);
     });
   }
 
@@ -83,12 +132,13 @@ export function createChapterTransition({
     finalLook.copy(worldFromLocal(city, lookLocal));
     const approach = worldFromLocal(city, approachLocal);
 
-    const c1 = startCamera.clone().lerp(approach, 0.42).add(new THREE.Vector3(0, 3.2, 0));
+    const c1 = startCamera.clone().lerp(approach, 0.42).add(new THREE.Vector3(0, pose.cameraControlLift ?? 3.2, 0));
     const c2 = approach.clone();
     cameraCurve = new THREE.CubicBezierCurve3(startCamera.clone(), c1, c2, finalCamera.clone());
 
     const l1 = startLook.clone().lerp(finalLook, 0.34).add(new THREE.Vector3(0, 1.4, 0));
-    const l2 = finalLook.clone().add(new THREE.Vector3(-2.4, 1.2, 3.2));
+    const lookControlOffset = pose.lookControlOffset ?? [-2.4, 1.2, 3.2];
+    const l2 = finalLook.clone().add(new THREE.Vector3(...lookControlOffset));
     lookCurve = new THREE.CubicBezierCurve3(startLook.clone(), l1, l2, finalLook.clone());
     return pose;
   }
@@ -112,6 +162,7 @@ export function createChapterTransition({
       chapter: chapter.id,
       duration: chapter.duration,
       finalFov: pose.finalFov,
+      finalRoll: pose.finalRoll ?? 0,
       silhouetteStart: 0.66,
       contextFadeStart: 0.56,
       contentStart: 0.72,
@@ -128,12 +179,14 @@ export function createChapterTransition({
     lookCurve.getPointAt(easeOutQuint(raw), tmpLook);
     camera.position.copy(tmpCamera);
     currentLook.copy(tmpLook);
-    camera.lookAt(currentLook);
 
     const pose = window.matchMedia("(max-width: 760px)").matches ? chapter.camera.mobile : chapter.camera.desktop;
+    const roll = THREE.MathUtils.lerp(0, pose.finalRoll ?? 0, smoothstep(0.56, 1, raw));
+    applyCameraPose(camera, currentLook, roll);
+
     const speedEnvelope = Math.sin(Math.PI * Math.min(1, raw / 0.82));
     const baseFov = THREE.MathUtils.lerp(startFov, pose.finalFov, smoothstep(0.54, 1, raw));
-    const fov = baseFov + speedEnvelope * 8.5;
+    const fov = baseFov + speedEnvelope * (pose.fovBoost ?? 8.5);
     if (Math.abs(camera.fov - fov) > 0.025) {
       camera.fov = fov;
       camera.updateProjectionMatrix();
@@ -145,21 +198,35 @@ export function createChapterTransition({
     setContextProgress(contextProgress);
     silhouette.setProgress(silhouetteProgress);
     setContentProgress(contentProgress);
-    renderer.toneMappingExposure = THREE.MathUtils.lerp(startExposure, 0.92, smoothstep(0.58, 1, raw));
+    renderer.toneMappingExposure = THREE.MathUtils.lerp(
+      startExposure,
+      chapter.finalExposure ?? 0.92,
+      smoothstep(0.58, 1, raw)
+    );
 
     if (raw >= 1) {
       state = "chapter";
       camera.position.copy(finalCamera);
       currentLook.copy(finalLook);
-      camera.lookAt(finalLook);
+      applyCameraPose(camera, finalLook, pose.finalRoll ?? 0);
       camera.fov = pose.finalFov;
       camera.updateProjectionMatrix();
-      renderer.toneMappingExposure = 0.92;
+      renderer.toneMappingExposure = chapter.finalExposure ?? 0.92;
       setContextProgress(1);
       silhouette.setProgress(1);
       setContentProgress(1);
       stage.classList.remove("is-chapter-transition");
       stage.classList.add("is-chapter-active");
+      window.__h1V3ChapterFramingAudit = {
+        chapter: chapter.id,
+        viewport: projectedBounds(silhouette.silhouette, camera),
+        target: {
+          desiredCenterX: [0.74, 0.84],
+          desiredHeight: [0.72, 0.95],
+          allowsRightCrop: true,
+          allowsBottomCrop: true
+        }
+      };
       onStateChange?.(state);
     }
     return true;
@@ -169,6 +236,7 @@ export function createChapterTransition({
     state = "overview";
     silhouette.reset();
     setContextProgress(0);
+    camera.up.set(0, 1, 0);
     stage.classList.remove("is-chapter-transition", "is-chapter-active");
     setContentProgress(0);
     renderer.toneMappingExposure = 1.52;
