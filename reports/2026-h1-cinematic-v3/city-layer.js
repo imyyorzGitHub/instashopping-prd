@@ -23,21 +23,33 @@ let city = null;
 let ready = false;
 let arrivalStarted = 0;
 
-createMacauCity().then(group => {
-  city = group;
-  city.scale.setScalar(1.08);
-  city.rotation.y = -0.19;
-  city.position.set(-2, -4, 10);
-  scene.add(city);
-  ready = true;
-  window.__h1V3CityMeta = city.userData.meta;
-  attribution.textContent = `© OpenStreetMap contributors · ODbL · ${city.userData.meta.counts.buildings.toLocaleString()} buildings`;
-}).catch(error => {
-  console.error("Macau city load failed", error);
-  canvas.style.display = "none";
-  attribution.textContent = "澳门城市数据装载失败";
-  attribution.style.color = "#ff9f8b";
-});
+function startCityBuild() {
+  createMacauCity().then(group => {
+    city = group;
+    city.scale.setScalar(1.08);
+    city.rotation.y = -0.19;
+    city.position.set(-2, -4, 10);
+    scene.add(city);
+    ready = true;
+    window.__h1V3CityMeta = city.userData.meta;
+    attribution.textContent = `© OpenStreetMap contributors · ODbL · ${city.userData.meta.counts.buildings.toLocaleString()} buildings`;
+  }).catch(error => {
+    console.error("Macau city load failed", error);
+    canvas.style.display = "none";
+    attribution.textContent = "澳门城市数据装载失败";
+    attribution.style.color = "#ff9f8b";
+  });
+}
+
+function scheduleCityBuild() {
+  if (!window.__h1V3State?.ready) {
+    window.setTimeout(scheduleCityBuild, 160);
+    return;
+  }
+  if ("requestIdleCallback" in window) requestIdleCallback(startCityBuild, { timeout: 1400 });
+  else window.setTimeout(startCityBuild, 240);
+}
+scheduleCityBuild();
 
 const clock = new THREE.Clock();
 function animate() {
