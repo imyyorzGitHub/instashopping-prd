@@ -16,8 +16,7 @@ export function applyReadableNightLighting({ scene, renderer, city }) {
     for (const material of materials) {
       if (!material.color) continue;
 
-      // The Phase 2 window atlas was unintentionally used as both albedo and emissive.
-      // Keep it only as an emissive mask so the wall base colour remains visible.
+      // Keep the window atlas only as an emissive mask so the wall base colour remains visible.
       if (material.map && material.emissiveMap === material.map) {
         material.map = null;
       }
@@ -63,6 +62,7 @@ export function applyReadableNightLighting({ scene, renderer, city }) {
   ].map(([x, y, z, color, intensity]) => {
     const light = new THREE.PointLight(color, intensity, 92, 1.65);
     light.position.set(x, y, z);
+    light.userData.baseIntensity = intensity;
     return light;
   });
 
