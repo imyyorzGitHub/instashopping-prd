@@ -46,6 +46,43 @@ function createWindowTexture(hex, seedOffset) {
   return texture;
 }
 
+function createUrbanLand(data) {
+  const cell = 1.15;
+  const occupied = new Set();
+  const mark = (x, z, radius = 0) => {
+    const gx = Math.floor(x / cell);
+    const gz = Math.floor(z / cell);
+    for (let dx = -radius; dx <= radius; dx++) {
+      for (let dz = -radius; dz <= radius; dz++) occupied.add(`${gx + dx},${gz + dz}`);
+    }
+  };
+  data.buildings.forEach(building => building.p.forEach(([x, z]) => mark(x, z, 1)));
+  data.roads.forEach(road => road.p.forEach(([x, z]) => mark(x, z, road.b ? 2 : 1)));
+  const expanded = new Set(occupied);
+  for (const key of occupied) {
+    const [gx, gz] = key.split(",").map(Number);
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dz = -1; dz <= 1; dz++) expanded.add(`${gx + dx},${gz + dz}`);
+    }
+  }
+  const positions = [];
+  const indices = [];
+  let vertex = 0;
+  for (const key of expanded) {
+    const [gx, gz] = key.split(",").map(Number);
+    const x = gx * cell;
+    const z = gz * cell;
+    positions.push(x, -0.16, z, x + cell, -0.16, z, x + cell, -0.16, z + cell, x, -0.16, z + cell);
+    indices.push(vertex, vertex + 2, vertex + 1, vertex, vertex + 3, vertex + 2);
+    vertex += 4;
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color: 0x080d18, roughness: 0.92, metalness: 0.04 }));
+}
+
 function segmentGeometry(items, heightFor) {
   const vertices = [];
   for (const item of items) {
@@ -76,6 +113,7 @@ export async function createMacauCity() {
   water.rotation.x = -Math.PI / 2;
   water.position.y = -0.22;
   root.add(water);
+  root.add(createUrbanLand(data));
 
   const roadStyles = {
     major: { keys: new Set(["motorway", "trunk", "primary"]), color: 0xffbd78, opacity: 0.9 },
@@ -117,16 +155,18 @@ export async function createMacauCity() {
 
   const byKind = Object.fromEntries(Object.keys(PALETTES).map(kind => [kind, []]));
   const beaconPositions = [];
-  data.buildings.forEach((building, index) => {
+  const memory = navigator.deviceMemory || 8;
+  const maxBuildings = memory <= 4 ? 1700 : memory <= 6 ? 2300 : 3000;
+  data.buildings.slice(0, maxBuildings).forEach((building, index) => {
     const kind = PALETTES[building.k] ? building.k : "residential";
-    const height = Math.max(0.55, building.h);
+    const height = Math.max(0.18, building.h * 0.18);
     const geometry = new THREE.ExtrudeGeometry(shapeFrom(building.p), { depth: height, bevelEnabled: false, curveSegments: 1, steps: 1 });
     geometry.rotateX(-Math.PI / 2);
     geometry.translate(0, 0.015, 0);
     geometry.clearGroups();
     byKind[kind].push(geometry);
 
-    if (height > 8 && seeded(index) > 0.8) {
+    if (height > 1.45 && seeded(index) > 0.8) {
       const centroid = building.p.reduce((sum, point) => [sum[0] + point[0], sum[1] + point[1]], [0, 0]).map(value => value / building.p.length);
       beaconPositions.push(centroid[0], height + 0.12, centroid[1]);
     }
