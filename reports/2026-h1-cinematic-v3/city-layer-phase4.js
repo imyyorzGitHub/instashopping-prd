@@ -43,6 +43,7 @@ let activeLandmark = null;
 let flightController = null;
 let overviewTransition = null;
 let currentTarget = new THREE.Vector3(4, 0, 12);
+let wasVisible = false;
 
 function smoothstep(value) {
   const t = Math.max(0, Math.min(1, value));
@@ -178,9 +179,18 @@ function animate() {
   landmarkNav.classList.toggle("is-visible", state?.phase === "arrival");
 
   if (!visible) {
+    if (wasVisible) {
+      flightController?.resetOverview();
+      activeLandmark = null;
+      overviewTransition = null;
+      flightHud.root.classList.remove("is-visible");
+      setNavigationState("overview");
+    }
+    wasVisible = false;
     arrivalStarted = 0;
     return;
   }
+  wasVisible = true;
 
   if (!arrivalStarted) arrivalStarted = performance.now();
   const now = performance.now();
