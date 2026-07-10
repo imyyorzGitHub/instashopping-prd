@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-MO">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>2026 H1 闪购述职报告 · Cinematic V3</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main id="stage" data-phase="orbit">
+    <canvas id="scene" aria-label="电影化述职报告三维场景"></canvas>
+
+    <div id="loading" role="status">
+      <span class="loading-line"></span>
+      <strong>正在装载地球与跃迁系统</strong>
+      <small id="loading-copy">EARTH / ATMOSPHERE / WORMHOLE</small>
+    </div>
+
+    <section id="intro" class="hud-panel">
+      <span class="eyebrow">2026 H1 · INSTANT SHOPPING</span>
+      <h1>闪购述职报告</h1>
+      <p>从近地轨道锁定澳门，以空间跃迁进入真实夜间城市。</p>
+      <button id="enter-macau" type="button" disabled>
+        <span>锁定澳门并跃迁</span>
+        <small>SPACE / ENTER</small>
+      </button>
+    </section>
+
+    <section id="arrival" class="hud-panel" aria-hidden="true">
+      <span class="eyebrow">MACAU NIGHT APPROACH</span>
+      <h2>澳门上空</h2>
+      <p>Phase 1 已完成：真实地球与虫洞。下一阶段将接入本地 OSM 城市数据。</p>
+      <button id="replay" type="button">重新播放开场</button>
+    </section>
+
+    <div id="target-lock" aria-hidden="true">
+      <span class="target-dot"></span>
+      <span class="target-ring"></span>
+      <strong>MACAU</strong>
+      <small>22.1987° N · 113.5439° E</small>
+    </div>
+
+    <div id="flight-readout" aria-hidden="true">
+      <span id="phase-label">LOW EARTH ORBIT</span>
+      <span id="phase-value">ALT 420 KM</span>
+    </div>
+
+    <div id="vignette"></div>
+    <div id="grain"></div>
+  </main>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.183.2/+esm"
+    }
+  }
+  </script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
