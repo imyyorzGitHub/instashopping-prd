@@ -13,6 +13,7 @@ export function createLandmarkSilhouette(targetGroup, options = {}) {
   if (!targetGroup) throw new Error("Landmark group is required for silhouette transition");
 
   const fillColor = options.fill ?? 0x122139;
+  const fillOpacity = options.fillOpacity ?? 0.94;
   const edgeColor = options.edge ?? 0x6e91bd;
   const edgeOpacity = options.edgeOpacity ?? 0.5;
   const originalMaterials = [];
@@ -101,7 +102,7 @@ export function createLandmarkSilhouette(targetGroup, options = {}) {
         entry.material.emissiveIntensity = entry.baseEmissiveIntensity * (1 - progress);
       }
     });
-    silhouetteMaterials.forEach(material => { material.opacity = progress * 0.94; });
+    silhouetteMaterials.forEach(material => { material.opacity = progress * fillOpacity; });
     edgeMaterials.forEach(material => { material.opacity = progress * edgeOpacity; });
     targetGroup.visible = progress < 0.995;
   }
