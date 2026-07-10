@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { createMacauCity } from "./city.js";
+import { applyReadableNightLighting } from "./city-lighting-patch.js";
 
 const canvas = document.getElementById("city-layer");
 const attribution = document.getElementById("osm-attribution");
@@ -22,6 +23,7 @@ camera.lookAt(2, 0, 8);
 let city = null;
 let ready = false;
 let arrivalStarted = 0;
+let lightingRig = null;
 
 function startCityBuild() {
   createMacauCity().then(group => {
@@ -30,8 +32,10 @@ function startCityBuild() {
     city.rotation.y = -0.19;
     city.position.set(-2, -4, 10);
     scene.add(city);
+    lightingRig = applyReadableNightLighting({ scene, renderer, city });
     ready = true;
     window.__h1V3CityMeta = city.userData.meta;
+    window.__h1V3LightingRig = lightingRig;
     attribution.textContent = `© OpenStreetMap contributors · ODbL · ${city.userData.meta.counts.buildings.toLocaleString()} buildings`;
   }).catch(error => {
     console.error("Macau city load failed", error);
@@ -64,15 +68,21 @@ function animate() {
     return;
   }
   if (!arrivalStarted) arrivalStarted = performance.now();
+  const elapsed = clock.getElapsedTime();
   const t = Math.min(1, (performance.now() - arrivalStarted) / 4300);
   const eased = 1 - Math.pow(1 - t, 3);
   camera.position.set(
-    -20 + eased * 20 + Math.sin(clock.getElapsedTime() * 0.11) * 1.2,
+    -20 + eased * 20 + Math.sin(elapsed * 0.11) * 1.2,
     112 - eased * 39,
     142 - eased * 34
   );
   camera.lookAt(4, 0, 12);
-  city.position.y = -4 + Math.sin(clock.getElapsedTime() * 0.25) * 0.12;
+  city.position.y = -4 + Math.sin(elapsed * 0.25) * 0.12;
+  if (lightingRig?.districtLights) {
+    lightingRig.districtLights.forEach((light, index) => {
+      light.intensity *= 0.985 + Math.sin(elapsed * (0.42 + index * 0.06) + index) * 0.015;
+    });
+  }
   renderer.render(scene, camera);
 }
 animate();
