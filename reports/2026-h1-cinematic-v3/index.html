@@ -10,11 +10,12 @@
 <body>
   <main id="stage" data-phase="orbit">
     <canvas id="scene" aria-label="电影化述职报告三维场景"></canvas>
+    <canvas id="city-layer" aria-label="澳门真实城市夜景"></canvas>
 
     <div id="loading" role="status">
       <span class="loading-line"></span>
       <strong>正在装载地球与跃迁系统</strong>
-      <small id="loading-copy">EARTH / ATMOSPHERE / WORMHOLE</small>
+      <small id="loading-copy">EARTH / ATMOSPHERE / WORMHOLE / MACAU OSM</small>
     </div>
 
     <section id="intro" class="hud-panel">
@@ -30,7 +31,7 @@
     <section id="arrival" class="hud-panel" aria-hidden="true">
       <span class="eyebrow">MACAU NIGHT APPROACH</span>
       <h2>澳门上空</h2>
-      <p>Phase 1 已完成：真实地球与虫洞。下一阶段将接入本地 OSM 城市数据。</p>
+      <p>Phase 2：已接入本地 OpenStreetMap 建筑 footprint、真实道路、桥梁、水体与海岸线，并转化为夜间三维城市。</p>
       <button id="replay" type="button">重新播放开场</button>
     </section>
 
@@ -58,5 +59,6 @@
   }
   </script>
   <script type="module" src="./main-phase1b.js"></script>
+  <script type="module" src="./city-layer.js"></script>
 </body>
 </html>
