@@ -14,24 +14,39 @@ export const CHAPTERS = [
       { value: "72万", label: "线上毛利额", note: "目标 91 万 · 瓶颈暴露" }
     ],
     duration: 3.2,
+    finalExposure: 0.86,
+    context: {
+      finalOpacity: 0.05,
+      finalEmissiveIntensity: 0.012
+    },
     camera: {
       desktop: {
-        finalOffset: [-5.7, 2.55, 7.35],
-        finalLookOffset: [-1.75, 2.45, 0.15],
-        approachOffset: [-11.8, 7.2, 14.6],
-        finalFov: 48
+        // Low, close and wide: the landmark occupies the right side like a cinematic poster.
+        finalOffset: [-3.72, 0.78, 5.18],
+        finalLookOffset: [-2.42, 3.48, -0.08],
+        approachOffset: [-10.6, 6.6, 12.9],
+        lookControlOffset: [-1.25, 1.55, 2.55],
+        cameraControlLift: 2.15,
+        finalFov: 64,
+        fovBoost: 12.5,
+        finalRoll: -1.1
       },
       mobile: {
-        finalOffset: [-4.1, 3.15, 8.7],
-        finalLookOffset: [-0.55, 2.65, 0.2],
-        approachOffset: [-8.5, 7.8, 15.2],
-        finalFov: 52
+        finalOffset: [-3.08, 1.05, 5.82],
+        finalLookOffset: [-1.55, 3.42, 0.02],
+        approachOffset: [-8.4, 6.4, 12.6],
+        lookControlOffset: [-0.9, 1.25, 2.5],
+        cameraControlLift: 1.8,
+        finalFov: 68,
+        fovBoost: 10,
+        finalRoll: -0.7
       }
     },
     silhouette: {
-      fill: 0x122139,
-      edge: 0x6e91bd,
-      edgeOpacity: 0.52
+      fill: 0x172b48,
+      fillOpacity: 0.92,
+      edge: 0x9ac5ec,
+      edgeOpacity: 0.38
     }
   }
 ];
