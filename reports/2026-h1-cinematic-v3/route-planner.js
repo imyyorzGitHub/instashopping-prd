@@ -285,13 +285,31 @@ export function buildCinematicRoute(field, startPoint, endPoint, options = {}) {
   points.forEach((point, index) => {
     const t = index / Math.max(1, points.length - 1);
     const takeoff = THREE.MathUtils.smoothstep(t, 0, 0.16);
-    const landing = 1 - THREE.MathUtils.smoothstep(t, 0.78, 1);
+    const landing = THREE.MathUtils.smoothstep(t, 0.78, 1);
     point.y = THREE.MathUtils.lerp(startAltitude, cruise, takeoff);
     point.y = THREE.MathUtils.lerp(point.y, endAltitude, landing);
     point.y += Math.sin(t * Math.PI * 5) * 0.08;
   });
 
-  const curve = new THREE.CatmullRomCurve3(points, false, "centripetal", 0.34);
+  let curve = new THREE.CatmullRomCurve3(points, false, "centripetal", 0.24);
+  let validationSamples = curve.getSpacedPoints(260);
+  let blockedHits = validationSamples.reduce((hits, point) => {
+    const cell = field.gridOf(point.x, point.z);
+    if (!field.valid(cell.gx, cell.gz)) return hits + 1;
+    return hits + (field.blocked[field.indexOf(cell.gx, cell.gz)] ? 1 : 0);
+  }, 0);
+  if (blockedHits) {
+    const safePath = new THREE.CurvePath();
+    for (let i = 1; i < points.length; i++) safePath.add(new THREE.LineCurve3(points[i - 1], points[i]));
+    curve = safePath;
+    validationSamples = curve.getSpacedPoints(260);
+    blockedHits = validationSamples.reduce((hits, point) => {
+      const cell = field.gridOf(point.x, point.z);
+      if (!field.valid(cell.gx, cell.gz)) return hits + 1;
+      return hits + (field.blocked[field.indexOf(cell.gx, cell.gz)] ? 1 : 0);
+    }, 0);
+  }
+
   const samples = curve.getSpacedPoints(180);
   let length = 0;
   let turns = 0;
@@ -304,5 +322,5 @@ export function buildCinematicRoute(field, startPoint, endPoint, options = {}) {
     }
   }
   const duration = THREE.MathUtils.clamp(length / 5.8, 8.5, 15);
-  return { curve, points, length, duration, turns, blockedHits: 0 };
+  return { curve, points, length, duration, turns, blockedHits };
 }
