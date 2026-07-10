@@ -32,6 +32,14 @@ export function createChapterTransition({
   if (!landmark || !targetGroup) throw new Error(`Chapter landmark unavailable: ${chapter.landmarkId}`);
 
   const silhouette = createLandmarkSilhouette(targetGroup, chapter.silhouette);
+  const contextMeshes = city.userData.heroContextMeshesByZone?.[chapter.landmarkId] || [];
+  contextMeshes.forEach(mesh => {
+    mesh.material.transparent = true;
+    mesh.material.depthWrite = false;
+    mesh.userData.baseOpacity ??= mesh.material.opacity;
+    mesh.userData.baseEmissiveIntensity ??= mesh.material.emissiveIntensity;
+  });
+
   let state = "overview";
   let startedAt = 0;
   let durationMs = chapter.duration * 1000;
@@ -52,6 +60,16 @@ export function createChapterTransition({
     dimLayer.style.opacity = String(p * 0.96);
     glowLayer.style.opacity = String(p * 0.9);
     contentRoot.setAttribute("aria-hidden", p > 0.02 ? "false" : "true");
+  }
+
+  function setContextProgress(progress) {
+    const p = clamp01(progress);
+    contextMeshes.forEach(mesh => {
+      const baseOpacity = mesh.userData.baseOpacity ?? 0.82;
+      const baseEmissive = mesh.userData.baseEmissiveIntensity ?? mesh.material.emissiveIntensity;
+      mesh.material.opacity = THREE.MathUtils.lerp(baseOpacity, 0.12, p);
+      mesh.material.emissiveIntensity = THREE.MathUtils.lerp(baseEmissive, 0.04, p);
+    });
   }
 
   function buildTracks(startCamera, startLook) {
@@ -78,6 +96,7 @@ export function createChapterTransition({
   function start({ startLook }) {
     if (state === "transition") return false;
     silhouette.reset();
+    setContextProgress(0);
     stage.classList.remove("is-chapter-active");
     stage.classList.add("is-chapter-transition");
     setContentProgress(0);
@@ -94,7 +113,9 @@ export function createChapterTransition({
       duration: chapter.duration,
       finalFov: pose.finalFov,
       silhouetteStart: 0.66,
-      contentStart: 0.72
+      contextFadeStart: 0.56,
+      contentStart: 0.72,
+      contextMeshCount: contextMeshes.length
     };
     return true;
   }
@@ -118,8 +139,10 @@ export function createChapterTransition({
       camera.updateProjectionMatrix();
     }
 
+    const contextProgress = smoothstep(0.56, 0.94, raw);
     const silhouetteProgress = smoothstep(0.66, 0.96, raw);
     const contentProgress = smoothstep(0.72, 1, raw);
+    setContextProgress(contextProgress);
     silhouette.setProgress(silhouetteProgress);
     setContentProgress(contentProgress);
     renderer.toneMappingExposure = THREE.MathUtils.lerp(startExposure, 0.92, smoothstep(0.58, 1, raw));
@@ -132,6 +155,7 @@ export function createChapterTransition({
       camera.fov = pose.finalFov;
       camera.updateProjectionMatrix();
       renderer.toneMappingExposure = 0.92;
+      setContextProgress(1);
       silhouette.setProgress(1);
       setContentProgress(1);
       stage.classList.remove("is-chapter-transition");
@@ -144,6 +168,7 @@ export function createChapterTransition({
   function reset() {
     state = "overview";
     silhouette.reset();
+    setContextProgress(0);
     stage.classList.remove("is-chapter-transition", "is-chapter-active");
     setContentProgress(0);
     renderer.toneMappingExposure = 1.52;
