@@ -71,15 +71,17 @@ button { font: inherit; }
 
 #target-lock {
   position: absolute;
-  right: 19%;
-  top: 55%;
+  left: 50%;
+  top: 50%;
   z-index: 9;
   width: 180px;
   height: 100px;
   opacity: 0;
   transform: scale(.82);
+  transform-origin: 46px 42px;
   transition: opacity .7s ease, transform .7s ease;
   pointer-events: none;
+  will-change: left, top, transform;
 }
 #target-lock.is-visible { opacity: 1; transform: scale(1); }
 .target-dot { position: absolute; left: 44px; top: 39px; width: 5px; height: 5px; border-radius: 50%; background: #fff; box-shadow: 0 0 16px #fff, 0 0 30px var(--coral); }
@@ -114,6 +116,7 @@ button { font: inherit; }
   .hud-panel[aria-hidden="true"] { transform: translateY(24px); }
   .hud-panel h1 { font-size: clamp(48px, 15vw, 76px); }
   .hud-panel h2 { font-size: clamp(44px, 14vw, 70px); }
-  #target-lock { right: 4%; top: 39%; transform: scale(.82); }
+  #target-lock { transform: scale(.82); }
+  #target-lock.is-visible { transform: scale(.9); }
   #flight-readout { right: 16px; top: 16px; }
 }
