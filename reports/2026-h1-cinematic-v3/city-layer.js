@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { createMacauCity } from "./city.js";
 
 const canvas = document.getElementById("city-layer");
+const attribution = document.getElementById("osm-attribution");
 canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;opacity:0;transition:opacity .7s ease;";
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
@@ -30,9 +31,12 @@ createMacauCity().then(group => {
   scene.add(city);
   ready = true;
   window.__h1V3CityMeta = city.userData.meta;
+  attribution.textContent = `© OpenStreetMap contributors · ODbL · ${city.userData.meta.counts.buildings.toLocaleString()} buildings`;
 }).catch(error => {
   console.error("Macau city load failed", error);
   canvas.style.display = "none";
+  attribution.textContent = "澳门城市数据装载失败";
+  attribution.style.color = "#ff9f8b";
 });
 
 const clock = new THREE.Clock();
@@ -42,6 +46,7 @@ function animate() {
   const state = window.__h1V3State;
   const visible = state && (state.phase === "arrival" || (state.phase === "warp" && state.warpProgress > 0.69));
   canvas.style.opacity = visible ? "1" : "0";
+  attribution.style.opacity = visible ? "0.68" : "0";
   if (!visible) {
     arrivalStarted = 0;
     return;
