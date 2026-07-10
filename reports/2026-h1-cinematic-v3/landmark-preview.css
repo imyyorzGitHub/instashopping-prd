@@ -1,0 +1,75 @@
+#landmark-nav {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  z-index: 15;
+  width: min(920px, calc(100vw - 44px));
+  padding: 11px 14px 13px;
+  border: 1px solid rgba(173, 205, 241, .2);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(12, 24, 43, .74), rgba(5, 11, 24, .88));
+  box-shadow: 0 18px 55px rgba(0, 0, 0, .42), inset 0 1px rgba(255, 255, 255, .04);
+  backdrop-filter: blur(16px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 18px);
+  transition: opacity .5s ease, transform .5s ease, visibility .5s ease;
+}
+#landmark-nav.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+#landmark-title {
+  display: block;
+  margin: 0 4px 8px;
+  color: rgba(231, 241, 255, .72);
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+#landmark-buttons {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#landmark-buttons::-webkit-scrollbar { display: none; }
+#landmark-buttons button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid rgba(155, 195, 232, .18);
+  border-radius: 999px;
+  color: rgba(226, 238, 251, .68);
+  background: rgba(16, 31, 54, .52);
+  font-size: 11px;
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
+}
+#landmark-buttons button:hover,
+#landmark-buttons button:focus-visible {
+  color: #fff;
+  border-color: rgba(137, 216, 255, .55);
+  background: rgba(40, 78, 112, .62);
+  outline: none;
+  transform: translateY(-1px);
+}
+#landmark-buttons button.is-active {
+  color: #fff7e8;
+  border-color: rgba(255, 197, 126, .72);
+  background: linear-gradient(90deg, rgba(107, 57, 87, .86), rgba(42, 73, 108, .82));
+  box-shadow: 0 0 22px rgba(255, 138, 110, .13);
+}
+#stage[data-phase="arrival"] #arrival { top: 39%; }
+@media (max-width: 760px) {
+  #landmark-nav {
+    bottom: 18px;
+    width: calc(100vw - 24px);
+    padding: 9px 10px 10px;
+  }
+  #landmark-title { margin-bottom: 6px; }
+  #landmark-buttons button { min-height: 32px; padding: 0 11px; font-size: 10px; }
+  #stage[data-phase="arrival"] #arrival { bottom: 120px; top: auto; }
+}
