@@ -2,18 +2,26 @@ import * as THREE from "three";
 import { createMacauCity } from "./city.js";
 import { createHeroLandmarks } from "./hero-assets.js";
 import { applyReadableNightLighting } from "./city-lighting-patch.js";
-import { FIRST_CHAPTER } from "./chapter-config.js";
-import { createChapterTransition } from "./chapter-transition.js";
+import { CHAPTERS } from "./chapter-config.js";
+import { createChapterSequence } from "./chapter-transition.js";
 
 const stage = document.getElementById("stage");
 const canvas = document.getElementById("city-layer");
 const attribution = document.getElementById("osm-attribution");
 const startButton = document.getElementById("chapter-start");
-const chapterReplay = document.getElementById("chapter-replay");
+const overviewButton = document.getElementById("chapter-overview");
+const prevButton = document.getElementById("chapter-prev");
+const nextButton = document.getElementById("chapter-next");
 const replayOpening = document.getElementById("replay");
 const contentRoot = document.getElementById("chapter-content");
+const kickerRoot = document.getElementById("chapter-kicker-text");
+const titleRoot = document.getElementById("chapter-title");
+const bodyRoot = document.getElementById("chapter-body");
+const dataRoot = document.getElementById("chapter-data");
+const countRoot = document.getElementById("chapter-count");
 const dimLayer = document.getElementById("chapter-dim");
 const glowLayer = document.getElementById("chapter-glow");
+const wipeLayer = document.getElementById("chapter-wipe");
 
 const HERO_OSM_ZONES = [
   { id: "macau-tower", lat: 22.179767, lon: 113.536794, coreRadius: 1.45, contextRadius: 3.2 },
@@ -48,6 +56,25 @@ let currentTarget = new THREE.Vector3(4, 0, 12);
 const clock = new THREE.Clock();
 let elapsed = 0;
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+}
+
+function renderChapter(index, chapter) {
+  kickerRoot.textContent = `${chapter.index} · ${chapter.kicker}`;
+  titleRoot.textContent = chapter.title;
+  bodyRoot.textContent = chapter.body;
+  countRoot.textContent = `${String(index + 1).padStart(2, "0")} / ${String(CHAPTERS.length).padStart(2, "0")}`;
+  dataRoot.className = `chapter-data is-${chapter.layout} ${chapter.items.length === 5 ? "is-five" : ""}`;
+  dataRoot.innerHTML = chapter.items.map(item => {
+    const cls = chapter.layout === "metrics" ? "chapter-metric" : "chapter-row";
+    return `<article class="${cls}"><strong>${escapeHtml(item.value)}</strong><span>${escapeHtml(item.label)}</span><small>${escapeHtml(item.note || "")}</small></article>`;
+  }).join("");
+  prevButton.disabled = index === 0;
+  nextButton.textContent = index === CHAPTERS.length - 1 ? "完成 · 返回城市" : "下一章";
+  stage.dataset.chapter = chapter.id;
+}
+
 function overviewCamera(delta) {
   if (!arrivalStarted) arrivalStarted = performance.now();
   const t = Math.min(1, (performance.now() - arrivalStarted) / 3300);
@@ -67,35 +94,43 @@ function overviewCamera(delta) {
   }
 }
 
+function returnToOverview() {
+  if (!ready) return;
+  chapterController?.reset();
+  arrivalStarted = 0;
+  currentTarget.set(4, 0, 12);
+}
+
 async function startCityBuild() {
   try {
     const group = await createMacauCity({ heroZones: HERO_OSM_ZONES });
-
     city = group;
     const heroes = createHeroLandmarks(city.userData.meta);
     city.add(heroes);
     const landmarks = heroes.userData.landmarks;
     city.userData.landmarks = landmarks;
-
     city.scale.setScalar(1.08);
     city.rotation.y = -0.19;
     city.position.set(-2, -4, 10);
     scene.add(city);
 
     lightingRig = applyReadableNightLighting({ scene, renderer, city });
-    chapterController = createChapterTransition({
+    chapterController = createChapterSequence({
       camera,
       renderer,
       city,
       landmarks,
       heroRoot: heroes,
-      chapter: FIRST_CHAPTER,
+      chapters: CHAPTERS,
       stage,
       contentRoot,
       dimLayer,
       glowLayer,
-      onStateChange: state => {
+      wipeLayer,
+      onChapterChange: renderChapter,
+      onStateChange: (state, index) => {
         document.documentElement.dataset.chapterState = state;
+        if (index >= 0) document.documentElement.dataset.chapterIndex = String(index + 1);
       }
     });
 
@@ -107,7 +142,7 @@ async function startCityBuild() {
     startButton.disabled = false;
     attribution.textContent = `© OpenStreetMap contributors · ODbL · ${city.userData.meta.counts.buildings.toLocaleString()} buildings`;
   } catch (error) {
-    console.error("Macau chapter transition load failed", error);
+    console.error("Macau chapter sequence load failed", error);
     canvas.style.display = "none";
     attribution.textContent = "澳门章节场景装载失败";
     attribution.style.color = "#ff9f8b";
@@ -126,40 +161,45 @@ scheduleCityBuild();
 
 startButton?.addEventListener("click", () => {
   if (!ready || chapterController?.active || chapterController?.chapterActive) return;
-  chapterController.start({ startLook: currentTarget.clone() });
+  chapterController.start({ index: 0, startLook: currentTarget.clone() });
 });
 
-chapterReplay?.addEventListener("click", () => {
-  if (!ready) return;
-  chapterController.reset();
-  arrivalStarted = 0;
-  currentTarget.set(4, 0, 12);
+prevButton?.addEventListener("click", () => chapterController?.previous());
+nextButton?.addEventListener("click", () => {
+  if (!chapterController?.chapterActive) return;
+  if (chapterController.currentIndex >= CHAPTERS.length - 1) returnToOverview();
+  else chapterController.next();
 });
-
-replayOpening?.addEventListener("click", () => {
-  chapterController?.reset();
-  arrivalStarted = 0;
-  currentTarget.set(4, 0, 12);
-});
+overviewButton?.addEventListener("click", returnToOverview);
+replayOpening?.addEventListener("click", returnToOverview);
 
 window.addEventListener("keydown", event => {
   if (!ready || window.__h1V3State?.phase !== "arrival") return;
-  if (event.key === "1" || event.key === "ArrowRight" || event.code === "Space") {
-    if (!chapterController?.chapterActive) {
-      event.preventDefault();
-      startButton?.click();
-    }
+  const active = chapterController?.chapterActive;
+  if (!active && (event.key === "1" || event.key === "ArrowRight" || event.code === "Space")) {
+    event.preventDefault();
+    startButton?.click();
+    return;
   }
-  if (event.key.toLowerCase() === "r") chapterReplay?.click();
+  if (!active || chapterController.active) return;
+  if (event.key === "ArrowRight" || event.code === "Space") {
+    event.preventDefault();
+    nextButton?.click();
+  } else if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    prevButton?.click();
+  } else if (event.key === "Escape" || event.key.toLowerCase() === "r") {
+    returnToOverview();
+  }
 });
 
 function animate() {
   requestAnimationFrame(animate);
   if (!ready) return;
-  const state = window.__h1V3State;
-  const visible = state && (state.phase === "arrival" || (state.phase === "warp" && state.warpProgress > 0.69));
+  const globalState = window.__h1V3State;
+  const visible = globalState && (globalState.phase === "arrival" || (globalState.phase === "warp" && globalState.warpProgress > 0.69));
   canvas.style.opacity = visible ? "1" : "0";
-  attribution.style.opacity = visible && !chapterController?.chapterActive ? "0.58" : "0.24";
+  attribution.style.opacity = visible && !chapterController?.chapterActive ? "0.58" : "0.18";
   if (!visible) {
     arrivalStarted = 0;
     return;
