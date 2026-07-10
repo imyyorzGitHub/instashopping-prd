@@ -6,8 +6,8 @@
   <title>2026 H1 闪购述职报告 · Cinematic V3</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./landmark-preview.css">
   <link rel="stylesheet" href="./flight-preview.css">
+  <link rel="stylesheet" href="./phase4r.css">
 </head>
 <body>
   <main id="stage" data-phase="orbit">
@@ -16,8 +16,8 @@
 
     <div id="loading" role="status">
       <span class="loading-line"></span>
-      <strong>正在装载地球、澳门城市与航线系统</strong>
-      <small id="loading-copy">EARTH / WORMHOLE / MACAU OSM / SAFE FLIGHT</small>
+      <strong>正在装载地球、澳门城市与导演式街道航线</strong>
+      <small id="loading-copy">EARTH / WORMHOLE / MACAU OSM / DIRECTED STREET FLIGHT</small>
     </div>
 
     <section id="intro" class="hud-panel">
@@ -31,9 +31,9 @@
     </section>
 
     <section id="arrival" class="hud-panel" aria-hidden="true">
-      <span class="eyebrow">MACAU STREET FLIGHT</span>
-      <h2>澳门上空</h2>
-      <p>Phase 4：选择下方地标，即可沿真实道路安全走廊飞行。每段航程约 8–15 秒，最后进入地标停靠构图。</p>
+      <span class="eyebrow">PHASE 4R · DIRECTED STREET FLIGHT</span>
+      <h2>澳门塔 → 新葡京</h2>
+      <p>垂直切片：低空街谷、双轨相机、近景光流、遮挡揭示与章节停靠。其余路线暂时关闭。</p>
       <button id="replay" type="button">重新播放开场</button>
     </section>
 
@@ -51,17 +51,26 @@
 
     <div id="route-progress" aria-live="polite">
       <header>
-        <strong id="route-name">飞往澳门地标</strong>
-        <small id="route-status">等待航线</small>
+        <div>
+          <strong id="route-name">澳门塔 → 新葡京</strong>
+          <span id="route-beat">等待导演式航线</span>
+        </div>
+        <small id="route-status">等待起飞</small>
       </header>
       <div class="route-track"><span id="route-progress-fill"></span></div>
     </div>
 
-    <nav id="landmark-nav" aria-label="澳门地标航线">
-      <strong id="landmark-title">澳门城市概览</strong>
-      <div id="landmark-buttons"></div>
+    <nav id="vertical-slice-nav" aria-label="街道飞行垂直切片">
+      <button id="slice-start" class="is-primary" type="button" disabled>
+        <strong>开始：澳门塔 → 新葡京</strong>
+        <small>14.2 秒 · 8 个镜头节拍 · 快捷键 1</small>
+      </button>
+      <button id="slice-replay" type="button" disabled>重播航线 R</button>
+      <button class="future-route" data-future-route type="button">新葡京 → 大三巴</button>
+      <button class="future-route" data-future-route type="button">路氹及机场路线</button>
     </nav>
 
+    <div id="slice-note">本阶段只验收一条导演式路线。旧版即时 A* 航线已退出主体验；真实道路只用于坐标、吸附与安全参考。</div>
     <div id="osm-attribution" style="position:absolute;right:16px;bottom:12px;z-index:12;font-size:9px;letter-spacing:.06em;color:#c7d8ee;opacity:0;transition:opacity .6s ease;text-shadow:0 2px 10px #000;pointer-events:none">© OpenStreetMap contributors · ODbL</div>
     <div id="vignette"></div>
     <div id="grain"></div>
@@ -75,6 +84,6 @@
   }
   </script>
   <script type="module" src="./main-phase1b.js"></script>
-  <script type="module" src="./city-layer-phase4.js"></script>
+  <script type="module" src="./city-layer-phase4r.js"></script>
 </body>
 </html>
