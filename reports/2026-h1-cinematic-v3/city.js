@@ -21,6 +21,56 @@ function seeded(index) {
   return x - Math.floor(x);
 }
 
+function pointInPolygon(x, z, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [xi, zi] = polygon[i];
+    const [xj, zj] = polygon[j];
+    const crosses = ((zi > z) !== (zj > z)) && x < (xj - xi) * (z - zi) / ((zj - zi) || 1e-6) + xi;
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
+
+function pointSegmentDistance(px, pz, a, b) {
+  const dx = b[0] - a[0];
+  const dz = b[1] - a[1];
+  const denominator = dx * dx + dz * dz || 1;
+  const t = THREE.MathUtils.clamp(((px - a[0]) * dx + (pz - a[1]) * dz) / denominator, 0, 1);
+  return Math.hypot(px - (a[0] + dx * t), pz - (a[1] + dz * t));
+}
+
+function polygonDistanceToPoint(polygon, x, z) {
+  if (pointInPolygon(x, z, polygon)) return 0;
+  let nearest = Infinity;
+  for (let index = 0; index < polygon.length; index++) {
+    nearest = Math.min(nearest, pointSegmentDistance(x, z, polygon[index], polygon[(index + 1) % polygon.length]));
+  }
+  return nearest;
+}
+
+function prepareHeroZones(heroZones, meta) {
+  if (!heroZones?.length) return [];
+  const [centerLat, centerLon] = meta.center;
+  const scale = meta.scaleMetersPerUnit || 55;
+  return heroZones.map((zone, index) => ({
+    id: zone.id || `hero-${index}`,
+    x: (zone.lon - centerLon) * 111320 * Math.cos(THREE.MathUtils.degToRad(centerLat)) / scale,
+    z: -(zone.lat - centerLat) * 110540 / scale,
+    coreRadius: Math.max(0.2, zone.coreRadius || 1),
+    contextRadius: Math.max(zone.coreRadius || 1, zone.contextRadius || (zone.coreRadius || 1) * 1.8)
+  }));
+}
+
+function nearestHeroZone(building, zones) {
+  let nearest = null;
+  for (const zone of zones) {
+    const distance = polygonDistanceToPoint(building.p, zone.x, zone.z);
+    if (!nearest || distance < nearest.distance) nearest = { zone, distance };
+  }
+  return nearest;
+}
+
 function createWindowTexture(hex, seedOffset) {
   const canvas = document.createElement("canvas");
   canvas.width = 128;
@@ -98,10 +148,15 @@ function segmentGeometry(items, heightFor) {
   return geometry;
 }
 
-export async function createMacauCity() {
+function emptyKindBuckets() {
+  return Object.fromEntries(Object.keys(PALETTES).map(kind => [kind, []]));
+}
+
+export async function createMacauCity({ heroZones = [] } = {}) {
   const response = await fetch("./city-data.json", { cache: "no-cache" });
   if (!response.ok) throw new Error(`city-data.json ${response.status}`);
   const data = await response.json();
+  const preparedZones = prepareHeroZones(heroZones, data.meta);
 
   const root = new THREE.Group();
   root.name = "macau-osm-city";
@@ -153,18 +208,34 @@ export async function createMacauCity() {
     waterGeometries.forEach(geometry => geometry.dispose());
   }
 
-  const byKind = Object.fromEntries(Object.keys(PALETTES).map(kind => [kind, []]));
+  const byKind = emptyKindBuckets();
+  const contextByZone = Object.fromEntries(preparedZones.map(zone => [zone.id, emptyKindBuckets()]));
+  const contextCounts = Object.fromEntries(preparedZones.map(zone => [zone.id, 0]));
   const beaconPositions = [];
   const memory = navigator.deviceMemory || 8;
   const maxBuildings = memory <= 4 ? 1700 : memory <= 6 ? 2300 : 3000;
+  let removedBuildings = 0;
+
   data.buildings.slice(0, maxBuildings).forEach((building, index) => {
+    const nearest = nearestHeroZone(building, preparedZones);
+    if (nearest && nearest.distance <= nearest.zone.coreRadius) {
+      removedBuildings++;
+      return;
+    }
+
     const kind = PALETTES[building.k] ? building.k : "residential";
     const height = Math.max(0.18, building.h * 0.18);
     const geometry = new THREE.ExtrudeGeometry(shapeFrom(building.p), { depth: height, bevelEnabled: false, curveSegments: 1, steps: 1 });
     geometry.rotateX(-Math.PI / 2);
     geometry.translate(0, 0.015, 0);
     geometry.clearGroups();
-    byKind[kind].push(geometry);
+
+    if (nearest && nearest.distance <= nearest.zone.contextRadius) {
+      contextByZone[nearest.zone.id][kind].push(geometry);
+      contextCounts[nearest.zone.id]++;
+    } else {
+      byKind[kind].push(geometry);
+    }
 
     if (height > 1.45 && seeded(index) > 0.8) {
       const centroid = building.p.reduce((sum, point) => [sum[0] + point[0], sum[1] + point[1]], [0, 0]).map(value => value / building.p.length);
@@ -172,21 +243,45 @@ export async function createMacauCity() {
     }
   });
 
-  for (const [kind, geometries] of Object.entries(byKind)) {
-    if (!geometries.length) continue;
+  const textures = {};
+  const materialFor = (kind, opacity = 1) => {
     const palette = PALETTES[kind];
-    const texture = createWindowTexture(palette.window, kind.length);
-    const material = new THREE.MeshStandardMaterial({
+    const texture = textures[kind] || (textures[kind] = createWindowTexture(palette.window, kind.length));
+    return new THREE.MeshStandardMaterial({
       color: palette.wall,
       map: texture,
       emissiveMap: texture,
       emissive: new THREE.Color(palette.window),
       emissiveIntensity: palette.emissive,
       roughness: 0.64,
-      metalness: kind === "hotel" || kind === "commercial" ? 0.34 : 0.13
+      metalness: kind === "hotel" || kind === "commercial" ? 0.34 : 0.13,
+      transparent: opacity < 1,
+      opacity
     });
-    root.add(new THREE.Mesh(mergeGeometries(geometries, false), material));
+  };
+
+  for (const [kind, geometries] of Object.entries(byKind)) {
+    if (!geometries.length) continue;
+    root.add(new THREE.Mesh(mergeGeometries(geometries, false), materialFor(kind)));
     geometries.forEach(geometry => geometry.dispose());
+  }
+
+  const heroContextMeshesByZone = {};
+  for (const zone of preparedZones) {
+    const meshes = [];
+    for (const [kind, geometries] of Object.entries(contextByZone[zone.id])) {
+      if (!geometries.length) continue;
+      const material = materialFor(kind, 0.82);
+      const mesh = new THREE.Mesh(mergeGeometries(geometries, false), material);
+      mesh.name = `hero-context-${zone.id}-${kind}`;
+      mesh.userData.heroZoneId = zone.id;
+      mesh.userData.baseOpacity = material.opacity;
+      mesh.userData.baseEmissiveIntensity = material.emissiveIntensity;
+      root.add(mesh);
+      meshes.push(mesh);
+      geometries.forEach(geometry => geometry.dispose());
+    }
+    heroContextMeshesByZone[zone.id] = meshes;
   }
 
   if (beaconPositions.length) {
@@ -206,5 +301,11 @@ export async function createMacauCity() {
   root.add(hemisphere, moon, warmFill);
 
   root.userData.meta = data.meta;
+  root.userData.heroContextMeshesByZone = heroContextMeshesByZone;
+  root.userData.heroProtection = {
+    removedBuildings,
+    contextCounts,
+    zones: preparedZones.map(({ id, coreRadius, contextRadius }) => ({ id, coreRadius, contextRadius }))
+  };
   return root;
 }

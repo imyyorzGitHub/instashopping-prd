@@ -15,6 +15,15 @@ const contentRoot = document.getElementById("chapter-content");
 const dimLayer = document.getElementById("chapter-dim");
 const glowLayer = document.getElementById("chapter-glow");
 
+const HERO_OSM_ZONES = [
+  { id: "macau-tower", lat: 22.179767, lon: 113.536794, coreRadius: 1.45, contextRadius: 3.2 },
+  { id: "grand-lisboa", lat: 22.190863, lon: 113.543327, coreRadius: 2.15, contextRadius: 4.4 },
+  { id: "st-pauls", lat: 22.19758, lon: 113.54095, coreRadius: 1.55, contextRadius: 3.0 },
+  { id: "cotai", lat: 22.140556, lon: 113.563056, coreRadius: 4.9, contextRadius: 7.4 },
+  { id: "morpheus", lat: 22.15, lon: 113.5667, coreRadius: 2.65, contextRadius: 4.8 },
+  { id: "airport", lat: 22.150444, lon: 113.591509, coreRadius: 6.5, contextRadius: 9.5 }
+];
+
 canvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;opacity:0;transition:opacity .7s ease;";
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
@@ -60,12 +69,7 @@ function overviewCamera(delta) {
 
 async function startCityBuild() {
   try {
-    const [group, response] = await Promise.all([
-      createMacauCity(),
-      fetch("./city-data.json", { cache: "no-cache" })
-    ]);
-    if (!response.ok) throw new Error(`city-data.json ${response.status}`);
-    await response.json();
+    const group = await createMacauCity({ heroZones: HERO_OSM_ZONES });
 
     city = group;
     const heroes = createHeroLandmarks(city.userData.meta);
@@ -98,6 +102,7 @@ async function startCityBuild() {
     window.__h1V3ChapterController = chapterController;
     window.__h1V3CityMeta = city.userData.meta;
     window.__h1V3LightingRig = lightingRig;
+    window.__h1V3HeroProtection = city.userData.heroProtection;
     ready = true;
     startButton.disabled = false;
     attribution.textContent = `© OpenStreetMap contributors · ODbL · ${city.userData.meta.counts.buildings.toLocaleString()} buildings`;
