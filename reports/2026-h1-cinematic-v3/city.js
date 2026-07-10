@@ -1,11 +1,12 @@
 import * as THREE from "three";
+import { mergeGeometries } from "https://cdn.jsdelivr.net/npm/three@0.183.2/examples/jsm/utils/BufferGeometryUtils.js";
 
 const PALETTES = {
-  residential: { wall: 0x111827, roof: 0x252d40, window: 0xffd39a, emissive: 0.42 },
-  commercial:  { wall: 0x101a2d, roof: 0x263b62, window: 0x78d8ff, emissive: 0.64 },
-  hotel:       { wall: 0x21142d, roof: 0x56265f, window: 0xff96db, emissive: 0.88 },
-  public:      { wall: 0x122321, roof: 0x245046, window: 0x8dffd1, emissive: 0.54 },
-  industrial:  { wall: 0x20242c, roof: 0x383d49, window: 0xffbd68, emissive: 0.32 }
+  residential: { wall: 0x111827, window: 0xffd39a, emissive: 0.38 },
+  commercial:  { wall: 0x101a2d, window: 0x78d8ff, emissive: 0.58 },
+  hotel:       { wall: 0x21142d, window: 0xff96db, emissive: 0.84 },
+  public:      { wall: 0x122321, window: 0x8dffd1, emissive: 0.5 },
+  industrial:  { wall: 0x20242c, window: 0xffbd68, emissive: 0.28 }
 };
 
 function shapeFrom(points) {
@@ -13,10 +14,6 @@ function shapeFrom(points) {
   points.forEach(([x, z], index) => index ? shape.lineTo(x, -z) : shape.moveTo(x, -z));
   shape.closePath();
   return shape;
-}
-
-function lineGeometry(points, height = 0.05) {
-  return new THREE.BufferGeometry().setFromPoints(points.map(([x, z]) => new THREE.Vector3(x, height, z)));
 }
 
 function seeded(index) {
@@ -49,6 +46,21 @@ function createWindowTexture(hex, seedOffset) {
   return texture;
 }
 
+function segmentGeometry(items, heightFor) {
+  const vertices = [];
+  for (const item of items) {
+    const y = heightFor(item);
+    for (let index = 1; index < item.p.length; index++) {
+      const a = item.p[index - 1];
+      const b = item.p[index];
+      vertices.push(a[0], y, a[1], b[0], y, b[1]);
+    }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+  return geometry;
+}
+
 export async function createMacauCity() {
   const response = await fetch("./city-data.json", { cache: "no-cache" });
   if (!response.ok) throw new Error(`city-data.json ${response.status}`);
@@ -59,90 +71,92 @@ export async function createMacauCity() {
 
   const water = new THREE.Mesh(
     new THREE.PlaneGeometry(430, 370),
-    new THREE.MeshPhysicalMaterial({
-      color: 0x010713,
-      roughness: 0.18,
-      metalness: 0.72,
-      transparent: true,
-      opacity: 0.99,
-      clearcoat: 0.25
-    })
+    new THREE.MeshPhysicalMaterial({ color: 0x010713, roughness: 0.18, metalness: 0.72, transparent: true, opacity: 0.99, clearcoat: 0.25 })
   );
   water.rotation.x = -Math.PI / 2;
   water.position.y = -0.22;
   root.add(water);
 
-  const roadGroup = new THREE.Group();
-  const roadMaterials = {
-    motorway: new THREE.LineBasicMaterial({ color: 0xffa85c, transparent: true, opacity: 0.96, blending: THREE.AdditiveBlending }),
-    trunk: new THREE.LineBasicMaterial({ color: 0xffb977, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending }),
-    primary: new THREE.LineBasicMaterial({ color: 0xffd09a, transparent: true, opacity: 0.78, blending: THREE.AdditiveBlending }),
-    secondary: new THREE.LineBasicMaterial({ color: 0x8bd6ff, transparent: true, opacity: 0.62, blending: THREE.AdditiveBlending }),
-    tertiary: new THREE.LineBasicMaterial({ color: 0x719fcf, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending }),
-    default: new THREE.LineBasicMaterial({ color: 0x3f5b82, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending })
+  const roadStyles = {
+    major: { keys: new Set(["motorway", "trunk", "primary"]), color: 0xffbd78, opacity: 0.9 },
+    secondary: { keys: new Set(["secondary", "tertiary"]), color: 0x86d4ff, opacity: 0.56 },
+    local: { keys: null, color: 0x425e85, opacity: 0.24 }
   };
-  for (const road of data.roads) {
-    const material = roadMaterials[road.k] || roadMaterials.default;
-    roadGroup.add(new THREE.Line(lineGeometry(road.p, road.b ? 0.32 : 0.035), material));
+  for (const style of Object.values(roadStyles)) {
+    const items = data.roads.filter(road => style.keys ? style.keys.has(road.k) : !roadStyles.major.keys.has(road.k) && !roadStyles.secondary.keys.has(road.k));
+    if (!items.length) continue;
+    root.add(new THREE.LineSegments(
+      segmentGeometry(items, road => road.b ? 0.32 : 0.035),
+      new THREE.LineBasicMaterial({ color: style.color, transparent: true, opacity: style.opacity, blending: THREE.AdditiveBlending, depthWrite: false })
+    ));
   }
-  root.add(roadGroup);
 
-  const coastMaterial = new THREE.LineBasicMaterial({ color: 0x5fe4ff, transparent: true, opacity: 0.43, blending: THREE.AdditiveBlending });
-  for (const coast of data.coasts) root.add(new THREE.Line(lineGeometry(coast, 0.025), coastMaterial));
+  if (data.coasts.length) {
+    root.add(new THREE.LineSegments(
+      segmentGeometry(data.coasts.map(p => ({ p })), () => 0.025),
+      new THREE.LineBasicMaterial({ color: 0x5fe4ff, transparent: true, opacity: 0.43, blending: THREE.AdditiveBlending, depthWrite: false })
+    ));
+  }
 
-  const inlandWaterMaterial = new THREE.MeshBasicMaterial({ color: 0x061631, transparent: true, opacity: 0.76, side: THREE.DoubleSide });
+  const waterGeometries = [];
   for (const polygon of data.waters) {
     if (polygon.length < 3) continue;
     const geometry = new THREE.ShapeGeometry(shapeFrom(polygon));
     geometry.rotateX(-Math.PI / 2);
-    const mesh = new THREE.Mesh(geometry, inlandWaterMaterial);
-    mesh.position.y = -0.12;
-    root.add(mesh);
+    geometry.translate(0, -0.12, 0);
+    geometry.clearGroups();
+    waterGeometries.push(geometry);
+  }
+  if (waterGeometries.length) {
+    root.add(new THREE.Mesh(
+      mergeGeometries(waterGeometries, false),
+      new THREE.MeshBasicMaterial({ color: 0x061631, transparent: true, opacity: 0.76, side: THREE.DoubleSide })
+    ));
+    waterGeometries.forEach(geometry => geometry.dispose());
   }
 
-  const facadeMaterials = {};
-  const roofMaterials = {};
-  Object.entries(PALETTES).forEach(([kind, palette], index) => {
-    const texture = createWindowTexture(palette.window, index + 1);
-    facadeMaterials[kind] = new THREE.MeshStandardMaterial({
+  const byKind = Object.fromEntries(Object.keys(PALETTES).map(kind => [kind, []]));
+  const beaconPositions = [];
+  data.buildings.forEach((building, index) => {
+    const kind = PALETTES[building.k] ? building.k : "residential";
+    const height = Math.max(0.55, building.h);
+    const geometry = new THREE.ExtrudeGeometry(shapeFrom(building.p), { depth: height, bevelEnabled: false, curveSegments: 1, steps: 1 });
+    geometry.rotateX(-Math.PI / 2);
+    geometry.translate(0, 0.015, 0);
+    geometry.clearGroups();
+    byKind[kind].push(geometry);
+
+    if (height > 8 && seeded(index) > 0.8) {
+      const centroid = building.p.reduce((sum, point) => [sum[0] + point[0], sum[1] + point[1]], [0, 0]).map(value => value / building.p.length);
+      beaconPositions.push(centroid[0], height + 0.12, centroid[1]);
+    }
+  });
+
+  for (const [kind, geometries] of Object.entries(byKind)) {
+    if (!geometries.length) continue;
+    const palette = PALETTES[kind];
+    const texture = createWindowTexture(palette.window, kind.length);
+    const material = new THREE.MeshStandardMaterial({
       color: palette.wall,
       map: texture,
       emissiveMap: texture,
       emissive: new THREE.Color(palette.window),
       emissiveIntensity: palette.emissive,
-      roughness: 0.63,
+      roughness: 0.64,
       metalness: kind === "hotel" || kind === "commercial" ? 0.34 : 0.13
     });
-    roofMaterials[kind] = new THREE.MeshStandardMaterial({ color: palette.roof, roughness: 0.74, metalness: 0.2 });
-  });
+    root.add(new THREE.Mesh(mergeGeometries(geometries, false), material));
+    geometries.forEach(geometry => geometry.dispose());
+  }
 
-  const buildingGroup = new THREE.Group();
-  data.buildings.forEach((building, index) => {
-    const kind = PALETTES[building.k] ? building.k : "residential";
-    const height = Math.max(0.55, building.h);
-    const geometry = new THREE.ExtrudeGeometry(shapeFrom(building.p), {
-      depth: height,
-      bevelEnabled: false,
-      curveSegments: 1,
-      steps: 1
-    });
-    geometry.rotateX(-Math.PI / 2);
-    const mesh = new THREE.Mesh(geometry, [roofMaterials[kind], facadeMaterials[kind]]);
-    mesh.position.y = 0.015;
-    mesh.userData = { kind, height, area: building.a };
-    buildingGroup.add(mesh);
-
-    if (height > 8 && seeded(index) > 0.8) {
-      const centroid = building.p.reduce((sum, point) => [sum[0] + point[0], sum[1] + point[1]], [0, 0]).map(value => value / building.p.length);
-      const beacon = new THREE.Mesh(
-        new THREE.SphereGeometry(0.045, 7, 5),
-        new THREE.MeshBasicMaterial({ color: 0xff4657 })
-      );
-      beacon.position.set(centroid[0], height + 0.12, centroid[1]);
-      root.add(beacon);
-    }
-  });
-  root.add(buildingGroup);
+  if (beaconPositions.length) {
+    const beaconGeometry = new THREE.BufferGeometry();
+    beaconGeometry.setAttribute("position", new THREE.Float32BufferAttribute(beaconPositions, 3));
+    root.add(new THREE.Points(
+      beaconGeometry,
+      new THREE.PointsMaterial({ color: 0xff4657, size: 0.13, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })
+    ));
+  }
 
   const hemisphere = new THREE.HemisphereLight(0x6f92cf, 0x02040a, 0.78);
   const moon = new THREE.DirectionalLight(0xa4c1ff, 1.12);
@@ -152,7 +166,5 @@ export async function createMacauCity() {
   root.add(hemisphere, moon, warmFill);
 
   root.userData.meta = data.meta;
-  root.userData.buildings = buildingGroup;
-  root.userData.roads = roadGroup;
   return root;
 }
