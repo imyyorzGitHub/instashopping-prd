@@ -16,7 +16,7 @@
   box-shadow: 0 18px 58px rgba(0, 0, 0, .38), inset 0 1px rgba(255, 255, 255, .04);
   opacity: 0;
   pointer-events: none;
-  transition: opacity .45s ease, transform .45s ease;
+  transition: opacity .3s ease, transform .3s ease, visibility .3s ease;
 }
 #stage[data-phase="arrival"] #vertical-slice-nav {
   opacity: 1;
@@ -46,9 +46,26 @@
 #vertical-slice-nav button.is-primary small { margin-top: 3px; opacity: .66; font-size: 10px; }
 #vertical-slice-nav button.is-active { box-shadow: 0 0 0 1px rgba(118, 226, 255, .48), 0 0 24px rgba(73, 196, 255, .18); }
 #vertical-slice-nav button:disabled { opacity: .34; cursor: not-allowed; }
-#route-progress { bottom: 100px; }
+
+#route-progress {
+  left: 18px;
+  top: 18px;
+  right: auto;
+  bottom: auto;
+  width: min(360px, calc(100vw - 36px));
+  padding: 8px 10px 7px;
+  border-color: rgba(158, 215, 255, .14);
+  border-radius: 8px;
+  background: rgba(4, 10, 22, .26);
+  box-shadow: none;
+  backdrop-filter: blur(3px);
+  transform: translateY(-8px);
+}
+#route-progress.is-visible { transform: translateY(0); }
 #route-progress header { align-items: flex-end; }
-#route-beat { display: block; margin-top: 4px; color: #84dbff; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+#route-beat { display: block; margin-top: 3px; color: #84dbff; font-size: 9px; letter-spacing: .11em; text-transform: uppercase; }
+.route-track { margin-top: 6px; }
+
 #slice-note {
   position: absolute;
   right: 18px;
@@ -58,18 +75,33 @@
   padding: 9px 11px;
   border: 1px solid rgba(151, 203, 255, .15);
   border-radius: 10px;
-  background: rgba(5, 11, 22, .56);
+  background: rgba(5, 11, 22, .4);
   color: rgba(213, 232, 250, .65);
   font-size: 10px;
   line-height: 1.55;
   letter-spacing: .04em;
   opacity: 0;
-  transition: opacity .45s ease;
+  transition: opacity .3s ease, visibility .3s ease;
 }
 #stage[data-phase="arrival"] #slice-note { opacity: 1; }
+
+#stage.is-slice-flying #arrival,
+#stage.is-slice-flying #vertical-slice-nav,
+#stage.is-slice-flying #slice-note,
+#stage.is-slice-flying #flight-readout {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 @media (max-width: 760px) {
   #vertical-slice-nav { grid-template-columns: 1fr 1fr; }
   #vertical-slice-nav .future-route { display: none; }
-  #route-progress { bottom: 130px; }
+  #route-progress {
+    left: 12px;
+    top: 12px;
+    bottom: auto;
+    width: min(330px, calc(100vw - 24px));
+  }
   #slice-note { display: none; }
 }

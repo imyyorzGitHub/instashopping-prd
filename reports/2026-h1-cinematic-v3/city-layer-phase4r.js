@@ -2,8 +2,10 @@ import * as THREE from "three";
 import { createMacauCity } from "./city.js";
 import { createHeroLandmarks } from "./hero-assets.js";
 import { createTowerLisboaSlice } from "./tower-lisboa-slice.js";
+import { prepareCollisionSafeSliceData } from "./phase4r-safety.js";
 import { applyReadableNightLighting } from "./city-lighting-patch.js";
 
+const stage = document.getElementById("stage");
 const canvas = document.getElementById("city-layer");
 const attribution = document.getElementById("osm-attribution");
 const startButton = document.getElementById("slice-start");
@@ -75,13 +77,19 @@ async function startCityBuild() {
     city.position.set(-2, -4, 10);
     scene.add(city);
 
+    const safeSlice = prepareCollisionSafeSliceData(cityData, landmarks);
+    window.__h1V3VerticalSlicePreflight = safeSlice.audit;
+    if (safeSlice.audit.collisionSamples > 0) {
+      console.warn("Phase 4R preflight retained collision samples", safeSlice.audit);
+    }
+
     lightingRig = applyReadableNightLighting({ scene, renderer, city });
     slice = createTowerLisboaSlice({
       scene,
       camera,
       city,
       landmarks,
-      cityData,
+      cityData: safeSlice.data,
       hud: { root: routeHud, route: routeName, status: routeStatus, progress: routeFill, beat: routeBeat }
     });
 
@@ -131,6 +139,7 @@ futureButtons.forEach(button => {
 
 replayOpening?.addEventListener("click", () => {
   slice?.cancel();
+  stage?.classList.remove("is-slice-flying");
   startButton?.classList.remove("is-active");
   arrivalStarted = 0;
 });
@@ -150,12 +159,14 @@ function animate() {
   attribution.style.opacity = visible ? "0.68" : "0";
   if (!visible) {
     arrivalStarted = 0;
+    stage?.classList.remove("is-slice-flying");
     return;
   }
 
   const elapsed = clock.getElapsedTime();
   city.position.y = -4 + Math.sin(elapsed * 0.25) * 0.12;
   const flying = slice?.update(performance.now(), elapsed);
+  stage?.classList.toggle("is-slice-flying", Boolean(slice?.active));
   if (!flying && !slice?.completed) overviewCamera(elapsed);
 
   if (lightingRig?.districtLights) {
