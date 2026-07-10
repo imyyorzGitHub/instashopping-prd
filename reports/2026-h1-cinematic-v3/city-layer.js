@@ -80,7 +80,8 @@ function animate() {
   city.position.y = -4 + Math.sin(elapsed * 0.25) * 0.12;
   if (lightingRig?.districtLights) {
     lightingRig.districtLights.forEach((light, index) => {
-      light.intensity *= 0.985 + Math.sin(elapsed * (0.42 + index * 0.06) + index) * 0.015;
+      const base = light.userData.baseIntensity || light.intensity;
+      light.intensity = base * (1 + Math.sin(elapsed * (0.42 + index * 0.06) + index) * 0.035);
     });
   }
   renderer.render(scene, camera);
