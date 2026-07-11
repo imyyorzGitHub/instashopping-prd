@@ -1,0 +1,208 @@
+:root {
+  --brand-pink: #ff326b;
+  --brand-coral: #ff4f59;
+  --brand-orange: #ff7437;
+  --brand-plum: #16051f;
+  --brand-magenta: #ff3f98;
+  --brand-rim: #ff8a3d;
+  --brand-white: #fffaf6;
+  --brand-progress: 0;
+}
+
+.chapter-brand-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
+}
+
+#chapter-brand-field {
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at 80% 44%, rgba(255, 163, 91, .38), transparent 34%),
+    linear-gradient(180deg, var(--brand-pink) 0%, var(--brand-coral) 45%, var(--brand-orange) 100%);
+}
+
+#chapter-brand-field::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 34% 34%, rgba(255, 255, 255, .11), transparent 28%),
+    linear-gradient(90deg, rgba(116, 9, 45, .08), transparent 58%);
+}
+
+#chapter-brand-haze {
+  z-index: 3;
+  background:
+    linear-gradient(180deg, rgba(255, 48, 104, .72), rgba(255, 96, 63, .55) 58%, rgba(255, 122, 50, .4)),
+    radial-gradient(ellipse at 78% 58%, rgba(255, 79, 144, .35), transparent 42%);
+  mix-blend-mode: color;
+}
+
+#chapter-brand-light {
+  z-index: 4;
+  background:
+    radial-gradient(ellipse at 82% 52%, rgba(255, 115, 58, .44), transparent 36%),
+    radial-gradient(ellipse at 70% 34%, rgba(255, 57, 137, .3), transparent 42%);
+  mix-blend-mode: screen;
+}
+
+#vignette, #grain { transition: opacity .35s ease; }
+
+#stage[data-chapter="performance"] #chapter-dim {
+  background:
+    linear-gradient(90deg, rgba(84, 5, 39, .2) 0%, rgba(84, 5, 39, .1) 50%, transparent 72%),
+    linear-gradient(0deg, rgba(120, 18, 34, .08), transparent 54%);
+}
+
+#stage[data-chapter="performance"] #chapter-glow {
+  background:
+    radial-gradient(ellipse at 82% 52%, rgba(255, 132, 54, .38), transparent 34%),
+    radial-gradient(ellipse at 70% 42%, rgba(255, 50, 137, .26), transparent 44%) !important;
+  mix-blend-mode: screen;
+}
+
+#stage[data-chapter="performance"] #chapter-content {
+  left: clamp(54px, 5.7vw, 110px);
+  width: min(58vw, 980px);
+  padding-top: clamp(44px, 6.5vh, 78px);
+  padding-bottom: clamp(44px, 6.5vh, 78px);
+}
+
+#stage[data-chapter="performance"] .chapter-kicker {
+  color: rgba(255, 250, 246, .9);
+  font-size: 12px;
+  font-weight: 660;
+  letter-spacing: .12em;
+}
+
+#stage[data-chapter="performance"] .chapter-kicker::before {
+  background: linear-gradient(90deg, rgba(255,255,255,.88), transparent);
+}
+
+#stage[data-chapter="performance"] #chapter-content h2 {
+  max-width: 860px;
+  margin-top: 16px;
+  color: var(--brand-white);
+  font-family: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif;
+  font-size: clamp(48px, 4.65vw, 80px);
+  font-weight: 650;
+  line-height: .98;
+  letter-spacing: -.045em;
+  text-shadow: 0 14px 38px rgba(86, 6, 39, .22);
+}
+
+#stage[data-chapter="performance"] .chapter-body {
+  max-width: 850px;
+  margin-top: 22px;
+  color: rgba(255, 250, 246, .9);
+  font-size: clamp(15px, 1.16vw, 18px);
+  line-height: 1.62;
+  text-shadow: 0 8px 24px rgba(86, 6, 39, .16);
+}
+
+#stage[data-chapter="performance"] .chapter-data {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 26px;
+}
+
+#stage[data-chapter="performance"] .chapter-metric {
+  min-height: 116px;
+  padding: 20px 18px 16px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .055));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .12), 0 16px 42px rgba(117, 11, 47, .08);
+  backdrop-filter: blur(9px);
+}
+
+#stage[data-chapter="performance"] .chapter-metric strong {
+  color: var(--brand-white);
+  font-size: clamp(28px, 2.2vw, 38px);
+  font-weight: 720;
+}
+
+#stage[data-chapter="performance"] .chapter-metric span {
+  margin-top: 12px;
+  color: rgba(255, 250, 246, .9);
+  font-size: 12px;
+}
+
+#stage[data-chapter="performance"] .chapter-metric small {
+  margin-top: 6px;
+  color: rgba(255, 245, 238, .58);
+  font-size: 9px;
+}
+
+#stage[data-chapter="performance"] .chapter-actions {
+  margin-top: 18px;
+}
+
+#stage[data-chapter="performance"] .chapter-actions button {
+  min-height: 38px;
+  border-color: rgba(255, 255, 255, .35);
+  color: rgba(255, 250, 246, .96);
+  background: rgba(98, 12, 49, .12);
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+}
+
+#stage[data-chapter="performance"] #chapter-next {
+  background: rgba(98, 12, 49, .24);
+}
+
+#stage[data-chapter="performance"] #chapter-count {
+  color: rgba(255, 250, 246, .7);
+}
+
+@media (max-height: 760px) and (min-width: 761px) {
+  #stage[data-chapter="performance"] #chapter-content {
+    left: clamp(46px, 5vw, 92px);
+    width: min(60vw, 920px);
+    padding-top: 30px;
+    padding-bottom: 16px;
+  }
+  #stage[data-chapter="performance"] #chapter-content h2 {
+    font-size: clamp(38px, 4vw, 58px);
+  }
+  #stage[data-chapter="performance"] .chapter-body {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.48;
+  }
+  #stage[data-chapter="performance"] .chapter-data {
+    margin-top: 15px;
+    gap: 8px;
+  }
+  #stage[data-chapter="performance"] .chapter-metric {
+    min-height: 82px;
+    padding: 11px 12px;
+  }
+  #stage[data-chapter="performance"] .chapter-metric strong { font-size: 27px; }
+  #stage[data-chapter="performance"] .chapter-metric span { margin-top: 7px; }
+  #stage[data-chapter="performance"] .chapter-metric small { display: none; }
+}
+
+@media (max-width: 760px) {
+  #stage[data-chapter="performance"] #chapter-content {
+    left: 20px;
+    right: 20px;
+    width: auto;
+    padding: 0 2px 0 0;
+  }
+  #stage[data-chapter="performance"] #chapter-content h2 {
+    font-family: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif;
+    font-size: clamp(36px, 10.5vw, 54px);
+  }
+  #stage[data-chapter="performance"] .chapter-data {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  #stage[data-chapter="performance"] .chapter-metric {
+    min-height: 82px;
+    padding: 10px 11px;
+  }
+}
