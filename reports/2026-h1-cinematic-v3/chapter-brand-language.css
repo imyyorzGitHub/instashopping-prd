@@ -1,0 +1,201 @@
+:root {
+  --chapter-brand-white: #fffaf6;
+  --chapter-brand-plum: #16051f;
+  --chapter-brand-coral: #ff5a72;
+  --chapter-brand-orange: #ff9a55;
+}
+
+#stage[data-chapter] {
+  --chapter-accent: #ff5a8f;
+  --chapter-accent-2: #ff9a55;
+  --chapter-panel-dark: rgba(28, 5, 22, .38);
+}
+
+#stage[data-chapter="situation"] { --chapter-accent: #ff6d89; --chapter-accent-2: #ffad66; }
+#stage[data-chapter="mapping"] { --chapter-accent: #ff4e91; --chapter-accent-2: #ffa050; }
+#stage[data-chapter="action"] { --chapter-accent: #ff4a9b; --chapter-accent-2: #ff9650; }
+#stage[data-chapter="result"] { --chapter-accent: #ff6687; --chapter-accent-2: #ffb060; }
+#stage[data-chapter="roadmap"] { --chapter-accent: #ff4f95; --chapter-accent-2: #ffa45b; }
+
+#stage.is-chapter-active #chapter-dim,
+#stage.is-chapter-transition #chapter-dim {
+  background:
+    linear-gradient(90deg, rgba(23, 4, 18, .54) 0%, rgba(28, 5, 21, .34) 45%, rgba(45, 10, 28, .09) 70%, transparent 100%),
+    linear-gradient(0deg, rgba(18, 4, 14, .1), transparent 58%);
+}
+
+#stage.is-chapter-active #chapter-glow,
+#stage.is-chapter-transition #chapter-glow {
+  background:
+    radial-gradient(ellipse at 82% 54%, color-mix(in srgb, var(--chapter-accent-2) 24%, transparent), transparent 31%),
+    radial-gradient(ellipse at 70% 35%, color-mix(in srgb, var(--chapter-accent) 13%, transparent), transparent 42%) !important;
+  mix-blend-mode: screen;
+}
+
+#stage[data-chapter] #chapter-content {
+  left: clamp(52px, 5.8vw, 112px);
+  width: min(53vw, 860px);
+  padding-top: clamp(42px, 6.5vh, 76px);
+  padding-bottom: clamp(38px, 6vh, 70px);
+}
+
+#stage[data-chapter] .chapter-kicker {
+  color: rgba(255, 247, 239, .88);
+  font-size: 11px;
+  letter-spacing: .14em;
+}
+
+#stage[data-chapter] .chapter-kicker::before {
+  width: 46px;
+  background: linear-gradient(90deg, var(--chapter-accent-2), var(--chapter-accent), transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--chapter-accent) 35%, transparent);
+}
+
+#stage[data-chapter] #chapter-content h2 {
+  max-width: 820px;
+  margin-top: 14px;
+  color: var(--chapter-brand-white);
+  font-family: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif;
+  font-size: clamp(42px, 4.25vw, 70px);
+  font-weight: 650;
+  line-height: 1.01;
+  letter-spacing: -.042em;
+  text-wrap: balance;
+  text-shadow: 0 14px 38px rgba(35, 5, 25, .3);
+}
+
+#stage[data-chapter] .chapter-body {
+  max-width: 800px;
+  margin-top: 18px;
+  color: rgba(255, 248, 242, .82);
+  font-size: clamp(14px, 1.05vw, 17px);
+  line-height: 1.58;
+  text-shadow: 0 8px 24px rgba(31, 4, 22, .2);
+}
+
+#stage[data-chapter] .chapter-data {
+  gap: 8px;
+  margin-top: 22px;
+}
+
+#stage[data-chapter] .chapter-metric,
+#stage[data-chapter] .chapter-row {
+  position: relative;
+  border: 0;
+  border-top: 1px solid rgba(255, 232, 212, .18);
+  border-radius: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(26,5,20,.05));
+  box-shadow: none;
+  backdrop-filter: blur(5px);
+  overflow: hidden;
+}
+
+#stage[data-chapter] .chapter-metric::before,
+#stage[data-chapter] .chapter-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 38%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--chapter-accent), var(--chapter-accent-2), transparent);
+}
+
+#stage[data-chapter] .chapter-metric {
+  min-height: 92px;
+  padding: 14px 15px 12px;
+}
+
+#stage[data-chapter] .chapter-row {
+  min-height: 70px;
+  padding: 11px 14px 10px;
+}
+
+#stage[data-chapter] .chapter-metric strong {
+  color: var(--chapter-brand-white);
+  font-size: clamp(24px, 2.15vw, 35px);
+  font-weight: 720;
+}
+
+#stage[data-chapter] .chapter-row strong {
+  color: var(--chapter-accent-2);
+  font-size: 12px;
+  letter-spacing: .045em;
+}
+
+#stage[data-chapter] .chapter-metric span,
+#stage[data-chapter] .chapter-row span {
+  color: rgba(255, 248, 242, .88);
+}
+
+#stage[data-chapter] .chapter-metric small,
+#stage[data-chapter] .chapter-row small {
+  color: rgba(255, 220, 190, .58);
+}
+
+#stage[data-chapter="situation"] .chapter-data {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#stage[data-chapter="mapping"] .chapter-data,
+#stage[data-chapter="action"] .chapter-data {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#stage[data-chapter="mapping"] .chapter-data article:last-child:nth-child(odd),
+#stage[data-chapter="action"] .chapter-data article:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+#stage[data-chapter="result"] .chapter-data,
+#stage[data-chapter="roadmap"] .chapter-data {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#stage[data-chapter] .chapter-actions button {
+  border-color: rgba(255, 235, 218, .24);
+  color: rgba(255, 250, 246, .94);
+  background: rgba(31, 6, 23, .18);
+  box-shadow: none;
+  backdrop-filter: blur(7px);
+}
+
+#stage[data-chapter] #chapter-next {
+  background: linear-gradient(110deg, color-mix(in srgb, var(--chapter-accent) 26%, rgba(31,6,23,.42)), color-mix(in srgb, var(--chapter-accent-2) 22%, rgba(31,6,23,.42)));
+}
+
+#stage[data-chapter] #chapter-count {
+  color: rgba(255, 239, 226, .66);
+}
+
+#stage.is-chapter-active #global-sunset-sun {
+  filter: opacity(.34) blur(.3px);
+}
+
+#stage.is-chapter-active #global-sunset-reflection {
+  opacity: .24 !important;
+}
+
+@media (max-height: 760px) and (min-width: 761px) {
+  #stage[data-chapter] #chapter-content {
+    left: clamp(44px, 5vw, 92px);
+    width: min(55vw, 820px);
+    padding-top: 28px;
+    padding-bottom: 14px;
+  }
+  #stage[data-chapter] #chapter-content h2 { font-size: clamp(34px, 3.75vw, 56px); }
+  #stage[data-chapter] .chapter-body { margin-top: 10px; font-size: 13px; line-height: 1.46; }
+  #stage[data-chapter] .chapter-data { margin-top: 13px; gap: 6px; }
+  #stage[data-chapter] .chapter-row { min-height: 56px; padding: 8px 11px; }
+  #stage[data-chapter] .chapter-metric { min-height: 76px; padding: 10px 12px; }
+}
+
+@media (max-width: 760px) {
+  #stage[data-chapter] #chapter-content { left: 20px; right: 20px; width: auto; padding: 0 2px 0 0; }
+  #stage[data-chapter] #chapter-content h2 { max-width: 96%; font-size: clamp(34px, 9.2vw, 50px); }
+  #stage[data-chapter="situation"] .chapter-data,
+  #stage[data-chapter="mapping"] .chapter-data,
+  #stage[data-chapter="action"] .chapter-data,
+  #stage[data-chapter="result"] .chapter-data,
+  #stage[data-chapter="roadmap"] .chapter-data { grid-template-columns: 1fr 1fr; }
+}
