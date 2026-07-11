@@ -3,12 +3,14 @@ import { createMacauCity } from "./city.js";
 import { createHeroLandmarks } from "./hero-assets.js";
 import { enhanceGrandLisboa } from "./grand-lisboa-enhancement.js";
 import { createFirstChapterBrandSystem } from "./brand-freeze.js";
+import { createGlobalColorSystem } from "./global-color-system.js";
 import { applyReadableNightLighting } from "./city-lighting-patch.js";
 import { CHAPTERS } from "./chapter-config.js";
 import { createChapterSequence } from "./chapter-transition.js";
 
 const stage = document.getElementById("stage");
 const canvas = document.getElementById("city-layer");
+const sceneCanvas = document.getElementById("scene");
 const attribution = document.getElementById("osm-attribution");
 const startButton = document.getElementById("chapter-start");
 const overviewButton = document.getElementById("chapter-overview");
@@ -24,6 +26,8 @@ const countRoot = document.getElementById("chapter-count");
 const dimLayer = document.getElementById("chapter-dim");
 const glowLayer = document.getElementById("chapter-glow");
 const wipeLayer = document.getElementById("chapter-wipe");
+
+const globalColorSystem = createGlobalColorSystem({ stage, sceneCanvas, cityCanvas: canvas });
 
 const HERO_OSM_ZONES = [
   { id: "macau-tower", lat: 22.179767, lon: 113.536794, coreRadius: 1.45, contextRadius: 3.2 },
@@ -152,6 +156,7 @@ async function startCityBuild() {
     scene.add(city);
 
     lightingRig = applyReadableNightLighting({ scene, renderer, city });
+    globalColorSystem.attachCity({ city, scene, lightingRig });
     brandSystem = createFirstChapterBrandSystem({ stage, scene, canvas, lightingRig });
     chapterController = createChapterSequence({
       camera,
@@ -171,9 +176,11 @@ async function startCityBuild() {
         if (index >= 0) document.documentElement.dataset.chapterIndex = String(index + 1);
       }
     });
+    globalColorSystem.harmonizeSilhouettes(city);
 
     window.__h1V3ChapterController = chapterController;
     window.__h1V3BrandSystem = brandSystem;
+    window.__h1V3GlobalColorSystem = globalColorSystem;
     window.__h1V3CityMeta = city.userData.meta;
     window.__h1V3LightingRig = lightingRig;
     window.__h1V3HeroProtection = city.userData.heroProtection;
