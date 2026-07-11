@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { createMacauCity } from "./city.js";
 import { createHeroLandmarks } from "./hero-assets.js";
+import { enhanceGrandLisboa } from "./grand-lisboa-enhancement.js";
+import { createFirstChapterBrandSystem } from "./brand-freeze.js";
 import { applyReadableNightLighting } from "./city-lighting-patch.js";
 import { CHAPTERS } from "./chapter-config.js";
 import { createChapterSequence } from "./chapter-transition.js";
@@ -51,6 +53,7 @@ let city = null;
 let ready = false;
 let arrivalStarted = 0;
 let lightingRig = null;
+let brandSystem = null;
 let chapterController = null;
 let currentTarget = new THREE.Vector3(4, 0, 12);
 const clock = new THREE.Clock();
@@ -139,6 +142,7 @@ async function startCityBuild() {
     const group = await createMacauCity({ heroZones: HERO_OSM_ZONES });
     city = group;
     const heroes = createHeroLandmarks(city.userData.meta);
+    enhanceGrandLisboa(heroes);
     city.add(heroes);
     const landmarks = heroes.userData.landmarks;
     city.userData.landmarks = landmarks;
@@ -148,6 +152,7 @@ async function startCityBuild() {
     scene.add(city);
 
     lightingRig = applyReadableNightLighting({ scene, renderer, city });
+    brandSystem = createFirstChapterBrandSystem({ stage, scene, canvas, lightingRig });
     chapterController = createChapterSequence({
       camera,
       renderer,
@@ -168,6 +173,7 @@ async function startCityBuild() {
     });
 
     window.__h1V3ChapterController = chapterController;
+    window.__h1V3BrandSystem = brandSystem;
     window.__h1V3CityMeta = city.userData.meta;
     window.__h1V3LightingRig = lightingRig;
     window.__h1V3HeroProtection = city.userData.heroProtection;
@@ -243,6 +249,7 @@ function animate() {
   const transitioning = chapterController?.update(performance.now());
   if (!transitioning && !chapterController?.chapterActive) overviewCamera(delta);
   updateDesktopPresentationFrame(delta);
+  brandSystem?.update(delta, chapterController);
 
   if (lightingRig?.districtLights && !chapterController?.active && !chapterController?.chapterActive) {
     lightingRig.districtLights.forEach((light, index) => {
