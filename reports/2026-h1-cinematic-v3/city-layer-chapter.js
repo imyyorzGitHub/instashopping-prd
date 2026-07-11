@@ -55,6 +55,10 @@ let chapterController = null;
 let currentTarget = new THREE.Vector3(4, 0, 12);
 const clock = new THREE.Clock();
 let elapsed = 0;
+let desktopFrameShift = 0;
+let lastViewOffsetX = null;
+let lastViewWidth = 0;
+let lastViewHeight = 0;
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
@@ -92,6 +96,35 @@ function overviewCamera(delta) {
     camera.fov = THREE.MathUtils.lerp(camera.fov, 47, 1 - Math.exp(-6 * delta));
     camera.updateProjectionMatrix();
   }
+}
+
+function updateDesktopPresentationFrame(delta) {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const desktopChapterMode = width > 760 && Boolean(chapterController?.active || chapterController?.chapterActive);
+  const targetShift = desktopChapterMode ? 0.08 : 0;
+  const alpha = 1 - Math.exp(-7.5 * Math.max(0.001, delta));
+  desktopFrameShift = THREE.MathUtils.lerp(desktopFrameShift, targetShift, alpha);
+  if (Math.abs(desktopFrameShift - targetShift) < 0.0003) desktopFrameShift = targetShift;
+
+  const offsetX = Math.round(-width * desktopFrameShift);
+  if (offsetX === lastViewOffsetX && width === lastViewWidth && height === lastViewHeight) return;
+
+  if (offsetX === 0) camera.clearViewOffset();
+  else camera.setViewOffset(width, height, offsetX, 0, width, height);
+
+  lastViewOffsetX = offsetX;
+  lastViewWidth = width;
+  lastViewHeight = height;
+  const rect = contentRoot?.getBoundingClientRect();
+  window.__h1V3DesktopCompositionAudit = {
+    desktop: width > 760,
+    chapterMode: desktopChapterMode,
+    sceneShiftFraction: desktopFrameShift,
+    viewOffsetX: offsetX,
+    viewport: { width, height },
+    content: rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height, centerY: rect.top + rect.height / 2 } : null
+  };
 }
 
 function returnToOverview() {
@@ -209,6 +242,7 @@ function animate() {
   elapsed += delta;
   const transitioning = chapterController?.update(performance.now());
   if (!transitioning && !chapterController?.chapterActive) overviewCamera(delta);
+  updateDesktopPresentationFrame(delta);
 
   if (lightingRig?.districtLights && !chapterController?.active && !chapterController?.chapterActive) {
     lightingRig.districtLights.forEach((light, index) => {
@@ -228,6 +262,10 @@ function resize() {
   renderer.setSize(width, height);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
+  lastViewOffsetX = null;
+  lastViewWidth = 0;
+  lastViewHeight = 0;
+  updateDesktopPresentationFrame(1);
 }
 window.addEventListener("resize", resize);
 resize();
