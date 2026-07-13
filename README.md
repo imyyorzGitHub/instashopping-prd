@@ -6,6 +6,7 @@
 
 | 文档 | 预览链接 | 更新时间 |
 |------|---------|---------|
+| PRD-闪购商家APP商品高级属性多选最小最大值配置 v1.0 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/8f7af24b.html) | 2026-07-13 |
 | PRD-商品管理优化需求（3项合并） v2.0 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/a72126dd.html) | 2026-07-13 |
 | PRD-闪购点金推广排序配置拆分 v3.5 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/3b3f3605.html) | 2026-07-01 |
 | PRD-闪购点金推广品类出价上限 v2.2 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/cc0feb6d.html) | 2026-06-26 |
