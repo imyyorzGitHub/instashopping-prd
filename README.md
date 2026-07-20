@@ -6,6 +6,7 @@
 
 | 文档 | 预览链接 | 更新时间 |
 |------|---------|---------|
+| 闪购搜索词输入页场景驱动推荐需求设计 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/8b7342e6.html) | 2026-07-20 |
 | PRD-闪购商家APP商品高级属性多选最小最大值配置 v1.0 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/8f7af24b.html) | 2026-07-13 |
 | PRD-商品管理优化需求（3项合并） v2.0 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/a72126dd.html) | 2026-07-13 |
 | PRD-闪购点金推广排序配置拆分 v3.5 | [点击预览](https://imyyorzgithub.github.io/instashopping-prd/prd/3b3f3605.html) | 2026-07-01 |
